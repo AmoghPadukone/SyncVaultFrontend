@@ -88,7 +88,7 @@ const Sidebar: React.FC = () => {
           <h2 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Connected Providers</h2>
           <div className="mt-2 space-y-1">
             {userProviders.map((connection) => (
-              <Link key={connection.id} href="/cloud">
+              <Link key={connection.id} href="/settings">
                 <a className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
                   <ProviderIcon providerId={connection.provider.id} size="small" className="mr-3" />
                   {connection.provider.name}
@@ -96,7 +96,7 @@ const Sidebar: React.FC = () => {
               </Link>
             ))}
             
-            <Link href="/cloud">
+            <Link href="/settings">
               <a className="flex items-center px-3 py-2 w-full text-sm font-medium rounded-md text-primary hover:bg-gray-100 dark:hover:bg-gray-800">
                 <PlusIcon className="h-5 w-5 mr-3" />
                 Add New
