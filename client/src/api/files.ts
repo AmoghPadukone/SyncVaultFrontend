@@ -46,6 +46,13 @@ export const filesApi = {
     const res = await apiRequest("GET", url);
     return await res.json();
   },
+  
+  // Provider direct access operations
+  getProviderContents: async (providerId: number, path: string): Promise<FolderContents> => {
+    const encodedPath = encodeURIComponent(path);
+    const res = await apiRequest("GET", `/api/providers/${providerId}/files?path=${encodedPath}`);
+    return await res.json();
+  },
 
   // Sharing operations
   generateShareLink: async (fileId: number, expiresIn?: number): Promise<{ url: string, token: string, expiresAt: string | null }> => {

@@ -6,6 +6,8 @@ import {
   CloudIcon,
   SettingsIcon,
   PlusIcon,
+  HardDrive,
+  Globe,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useQuery } from "@tanstack/react-query";
@@ -60,6 +62,13 @@ const Sidebar: React.FC = () => {
             </a>
           </Link>
           
+          <Link href="/live-cloud">
+            <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${location === "/live-cloud" ? "bg-primary text-white" : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"}`}>
+              <Globe className="h-5 w-5 mr-3" />
+              Live Cloud
+            </a>
+          </Link>
+          
           <Link href="/cloud">
             <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${location === "/cloud" ? "bg-primary text-white" : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"}`}>
               <CloudIcon className="h-5 w-5 mr-3" />
@@ -81,7 +90,7 @@ const Sidebar: React.FC = () => {
             {userProviders.map((connection) => (
               <Link key={connection.id} href="/cloud">
                 <a className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
-                  <ProviderIcon provider={connection.provider.type} className="mr-3" />
+                  <ProviderIcon providerId={connection.provider.id} size="small" className="mr-3" />
                   {connection.provider.name}
                 </a>
               </Link>
