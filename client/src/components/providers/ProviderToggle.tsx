@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
-import { CloudOff, CloudCog, CloudSync } from "lucide-react";
+import { CloudOff, CloudCog, CloudSun, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ProviderIcon from "@/components/common/ProviderIcon";
 
@@ -116,7 +116,7 @@ const ProviderToggle: React.FC<ProviderToggleProps> = ({
             state === "active" && "bg-green-100 dark:bg-green-900"
           )}
         >
-          <CloudSync className="h-4 w-4" />
+          <RefreshCw className="h-4 w-4" />
         </ToggleGroupItem>
       </ToggleGroup>
     </div>

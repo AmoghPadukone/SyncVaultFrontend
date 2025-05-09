@@ -39,6 +39,9 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import CloudProviderForm from "@/components/forms/CloudProviderForm";
+import ProviderList from "@/components/providers/ProviderList";
+import ProviderToggle, { ProviderState } from "@/components/providers/ProviderToggle";
+import ProviderConnectionModal from "@/components/providers/ProviderConnectionModal";
 
 const LiveCloud: React.FC = () => {
   const [isConnectDialogOpen, setIsConnectDialogOpen] = useState(false);
@@ -171,7 +174,7 @@ const LiveCloud: React.FC = () => {
                     <CardHeader className="pb-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                          <ProviderIcon provider={connection.provider.type} size={24} />
+                          <ProviderIcon providerId={connection.provider.id} size="medium" />
                           <CardTitle>{connection.provider.name}</CardTitle>
                         </div>
                         <div className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full dark:bg-green-900 dark:text-green-100">
@@ -256,7 +259,7 @@ const LiveCloud: React.FC = () => {
                     <Card key={provider.id} className={isConnected ? "opacity-50" : ""}>
                       <CardHeader className="pb-2">
                         <div className="flex items-center space-x-2">
-                          <ProviderIcon provider={provider.type} size={24} />
+                          <ProviderIcon providerId={provider.id} size="medium" />
                           <CardTitle>{provider.name}</CardTitle>
                         </div>
                       </CardHeader>
@@ -309,7 +312,7 @@ const LiveCloud: React.FC = () => {
                   disabled={isConnected || connectProviderMutation.isPending}
                   onClick={() => handleConnectProvider(provider.id)}
                 >
-                  <ProviderIcon provider={provider.type} className="mr-2" size={20} />
+                  <ProviderIcon providerId={provider.id} className="mr-2" size="small" />
                   <span className="flex-1 text-left">{provider.name}</span>
                   {isConnected ? (
                     <span className="text-xs text-green-600 dark:text-green-400">Connected</span>
