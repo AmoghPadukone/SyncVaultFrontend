@@ -1,11 +1,10 @@
 import React from "react";
-import { FolderOpen, CloudOff, Cloud } from "lucide-react";
+import { FolderOpen, CloudOff, Server } from "lucide-react";
 import { 
-  SiGoogledrive, 
-  SiDropbox, 
-  SiBox, 
-  SiAmazon
-} from "react-icons/si";
+  Cloud as CloudIcon, 
+  CloudApp as CloudAppIcon,
+  CloudServiceManagement as CloudServiceIcon,
+} from "@carbon/icons-react";
 
 interface ProviderIconProps {
   provider: string;
@@ -17,19 +16,15 @@ const ProviderIcon: React.FC<ProviderIconProps> = ({ provider, className = "", s
   const getProviderIcon = () => {
     switch (provider.toLowerCase()) {
       case "google-drive":
-        return <SiGoogledrive className={`text-yellow-500 ${className}`} size={size} />;
+        return <Cloud className={`text-green-500 ${className}`} width={size} height={size} />;
       case "dropbox":
-        return <SiDropbox className={`text-blue-500 ${className}`} size={size} />;
+        return <CloudApp className={`text-amber-600 ${className}`} width={size} height={size} />;
       case "onedrive":
-        return <Cloud className={`text-blue-600 ${className}`} size={size} />;
-      case "box":
-        return <SiBox className={`text-blue-400 ${className}`} size={size} />;
-      case "amazon-s3":
-        return <SiAmazon className={`text-amber-600 ${className}`} size={size} />;
+        return <CloudServiceManagement className={`text-blue-600 ${className}`} width={size} height={size} />;
       case "none":
         return <CloudOff className={`text-gray-400 ${className}`} size={size} />;
       default:
-        return <FolderOpen className={`text-gray-500 ${className}`} size={size} />;
+        return <Server className={`text-gray-500 ${className}`} size={size} />;
     }
   };
 
