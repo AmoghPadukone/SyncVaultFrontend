@@ -31,13 +31,7 @@ const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
   const [shareLink, setShareLink] = useState<string>("");
   const { toast } = useToast();
   
-  if (!isOpen) return null;
-  
-  const formattedDate = item.createdAt 
-    ? format(new Date(item.createdAt), "PPP 'at' p")  // Example: "Apr 29, 2023 at 2:30 PM"
-    : "Unknown date";
-    
-  // Share file mutation
+  // Share file mutation - moved before conditional return
   const shareMutation = useMutation({
     mutationFn: (data: { fileId: number, expiresIn?: number }) => {
       const expiresIn = data.expiresIn ? data.expiresIn : undefined;
@@ -58,6 +52,12 @@ const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
       });
     }
   });
+  
+  if (!isOpen) return null;
+  
+  const formattedDate = item.createdAt 
+    ? format(new Date(item.createdAt), "PPP 'at' p")  // Example: "Apr 29, 2023 at 2:30 PM"
+    : "Unknown date";
   
   const handleShare = () => {
     if (itemType === "file") {
