@@ -538,8 +538,14 @@ export class MemStorage implements IStorage {
     const now = new Date();
     
     const folder: Folder = {
-      ...folderData,
       id,
+      name: folderData.name,
+      path: folderData.path || `/${folderData.name}`,
+      userId: folderData.userId,
+      providerId: folderData.providerId || null,
+      parentId: folderData.parentId || null,
+      externalId: folderData.externalId || null,
+      isRoot: folderData.isRoot || false,
       createdAt: now,
       updatedAt: now
     };
@@ -596,8 +602,16 @@ export class MemStorage implements IStorage {
     const now = new Date();
     
     const file: File = {
-      ...fileData,
       id,
+      name: fileData.name,
+      path: fileData.path || `/${fileData.name}`,
+      size: fileData.size || 0,
+      userId: fileData.userId,
+      providerId: fileData.providerId || null,
+      externalId: fileData.externalId || null,
+      folderId: fileData.folderId || null,
+      mimeType: fileData.mimeType || null,
+      thumbnailUrl: fileData.thumbnailUrl || null,
       createdAt: now,
       updatedAt: now
     };
