@@ -430,9 +430,14 @@ const AuthPage: React.FC = () => {
           onConnect={(providerId, data) => {
             connectProviderMutation.mutate({
               providerId,
-              credentials: {
-                accessKey: data.accessKey,
-                bucketName: data.bucketName
+              connectionInfo: {
+                accessToken: data.accessKey,
+                refreshToken: data.secretKey,
+                expiresAt: null,
+                metadata: {
+                  bucketName: data.bucketName,
+                  region: data.region
+                }
               }
             });
           }}

@@ -63,14 +63,8 @@ const LiveCloud: React.FC = () => {
 
   // Connect provider mutation
   const connectProviderMutation = useMutation({
-    mutationFn: ({ providerId, credentials }: { providerId: number; credentials: { accessKey: string; bucketName: string } }) => 
-      providersApi.connectProvider(providerId, {
-        accessToken: credentials.accessKey,
-        refreshToken: '',
-        metadata: {
-          bucketName: credentials.bucketName
-        }
-      }),
+    mutationFn: ({ providerId, connectionInfo }: { providerId: number; connectionInfo: any }) => 
+      providersApi.connectProvider(providerId, connectionInfo),
     onSuccess: () => {
       toast({
         title: "Cloud provider connected",
@@ -117,8 +111,19 @@ const LiveCloud: React.FC = () => {
     setIsProviderModalOpen(true);
   };
   
-  const handleProviderSubmit = (providerId: number, credentials: { accessKey: string; bucketName: string }) => {
-    connectProviderMutation.mutate({ providerId, credentials });
+  const handleProviderSubmit = (providerId: number, data: any) => {
+    connectProviderMutation.mutate({ 
+      providerId, 
+      connectionInfo: {
+        accessToken: data.accessKey,
+        refreshToken: data.secretKey,
+        expiresAt: null,
+        metadata: {
+          bucketName: data.bucketName,
+          region: data.region
+        }
+      }
+    });
   };
 
   const handleDisconnectProvider = () => {
@@ -369,10 +374,15 @@ const LiveCloud: React.FC = () => {
           provider={supportedProviders.find(p => p.id === selectedProviderId) || supportedProviders[0]}
           onConnect={(providerId, data) => {
             connectProviderMutation.mutate({
-              providerId,
-              credentials: {
-                accessKey: data.accessKey,
-                bucketName: data.bucketName
+              providerId, 
+              connectionInfo: {
+                accessToken: data.accessKey,
+                refreshToken: data.secretKey,
+                expiresAt: null,
+                metadata: {
+                  bucketName: data.bucketName,
+                  region: data.region
+                }
               }
             });
           }}
