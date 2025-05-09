@@ -5,9 +5,10 @@ import { Search, SlidersHorizontal, Sparkles } from "lucide-react";
 interface ModeToggleProps {
   activeMode: "raw" | "advanced" | "smart";
   onModeChange: (mode: "raw" | "advanced" | "smart") => void;
+  activeFiltersCount?: number;
 }
 
-const ModeToggle: React.FC<ModeToggleProps> = ({ activeMode, onModeChange }) => {
+const ModeToggle: React.FC<ModeToggleProps> = ({ activeMode, onModeChange, activeFiltersCount = 0 }) => {
   return (
     <div className="flex space-x-2">
       <Button
@@ -28,6 +29,11 @@ const ModeToggle: React.FC<ModeToggleProps> = ({ activeMode, onModeChange }) => 
       >
         <SlidersHorizontal className="h-4 w-4" />
         <span>Advanced</span>
+        {activeFiltersCount > 0 && (
+          <span className="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+            {activeFiltersCount}
+          </span>
+        )}
       </Button>
       
       <Button

@@ -120,6 +120,21 @@ const SearchBar: React.FC = () => {
   const handleModeChange = (mode: "raw" | "advanced" | "smart") => {
     setSearchMode(mode);
   };
+  
+  // Get counts of active filters for display
+  const getActiveFiltersCount = () => {
+    let count = 0;
+    if (advancedParams.fileName) count++;
+    if (advancedParams.mimeType !== "all") count++;
+    if (advancedParams.tag) count++;
+    if (advancedParams.isFavorite) count++;
+    if (advancedParams.sharedOnly) count++;
+    if (advancedParams.sizeMin > 0) count++;
+    if (advancedParams.sizeMax) count++;
+    if (advancedParams.createdAfter) count++;
+    if (advancedParams.createdBefore) count++;
+    return count;
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -196,7 +211,8 @@ const SearchBar: React.FC = () => {
           <div className="p-3">
             <ModeToggle 
               activeMode={searchMode} 
-              onModeChange={handleModeChange} 
+              onModeChange={handleModeChange}
+              activeFiltersCount={getActiveFiltersCount()}
             />
             
             {searchMode === "smart" && searchQuery.length > 2 && (
@@ -404,7 +420,29 @@ const SearchBar: React.FC = () => {
               </div>
             )}
             
-            <div className="mt-3 flex justify-end">
+            <div className="mt-3 flex justify-between">
+              <Button 
+                type="button" 
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setAdvancedParams({
+                    fileName: "",
+                    mimeType: "all",
+                    tag: "",
+                    isFavorite: false,
+                    sizeMin: 0,
+                    sizeMax: undefined,
+                    sharedOnly: false,
+                    createdBefore: undefined,
+                    createdAfter: undefined,
+                  });
+                }}
+                className="text-xs"
+              >
+                Reset Filters
+              </Button>
+              
               <Button 
                 type="submit" 
                 size="sm"

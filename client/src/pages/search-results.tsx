@@ -22,7 +22,7 @@ const SearchResults: React.FC = () => {
   const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false);
   const [advancedSearchParams, setAdvancedSearchParams] = useState<AdvancedSearchParams>({
     fileName: "",
-    mimeType: "",
+    mimeType: "all",
     tag: "",
     isFavorite: false,
     sizeMin: 0,
@@ -31,6 +31,21 @@ const SearchResults: React.FC = () => {
     createdBefore: undefined,
     createdAfter: undefined,
   });
+  
+  // Function to count active filters
+  const getActiveFiltersCount = () => {
+    let count = 0;
+    if (advancedSearchParams.fileName) count++;
+    if (advancedSearchParams.mimeType !== "all") count++;
+    if (advancedSearchParams.tag) count++;
+    if (advancedSearchParams.isFavorite) count++;
+    if (advancedSearchParams.sharedOnly) count++;
+    if (advancedSearchParams.sizeMin > 0) count++;
+    if (advancedSearchParams.sizeMax) count++;
+    if (advancedSearchParams.createdAfter) count++;
+    if (advancedSearchParams.createdBefore) count++;
+    return count;
+  };
   
   // Get search query and advanced parameters from URL
   useEffect(() => {
