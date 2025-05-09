@@ -68,14 +68,6 @@ const Sidebar: React.FC = () => {
               Live Cloud
             </a>
           </Link>
-          
-          <Link href="/cloud">
-            <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${location === "/cloud" ? "bg-primary text-white" : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"}`}>
-              <CloudIcon className="h-5 w-5 mr-3" />
-              Providers
-            </a>
-          </Link>
-          
           <Link href="/settings">
             <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${location === "/settings" ? "bg-primary text-white" : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"}`}>
               <SettingsIcon className="h-5 w-5 mr-3" />
