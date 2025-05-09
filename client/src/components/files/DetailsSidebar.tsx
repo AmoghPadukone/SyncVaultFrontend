@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { File, Folder } from "@shared/schema";
-import { X, FileText, Folder as FolderIcon, Clock, User, Calendar, HardDrive, Share2, Download, Link } from "lucide-react";
+import { X, FileText, Folder as FolderIcon, Clock, User, Calendar, HardDrive, Share2, Download, Link, Copy, Loader2 } from "lucide-react";
 import { getFileTypeIcon, getReadableFileSize } from "@/utils/file-utils";
 import { format } from "date-fns";
 import ProviderIcon from "@/components/common/ProviderIcon";

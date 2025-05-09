@@ -1,52 +1,94 @@
-import React from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import ProviderToggle, { ProviderState } from "./ProviderToggle";
-import { CloudProvider, UserCloudProvider } from "@shared/schema";
+import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { providersApi } from "@/api/providers";
+import ProviderToggle from "./ProviderToggle";
+import ProviderConnectionModal from "./ProviderConnectionModal";
+import { CloudProvider } from "@shared/schema";
+import { Skeleton } from "@/components/ui/skeleton";
+import { AlertTriangle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-interface ProviderListProps {
-  providers: (CloudProvider & { connected?: boolean; state?: ProviderState })[];
-  onProviderStateChange?: (providerId: number, state: ProviderState) => void;
-  className?: string;
-}
-
-const ProviderList: React.FC<ProviderListProps> = ({
-  providers,
-  onProviderStateChange,
-  className
-}) => {
-  const handleStateChange = (providerId: number, state: ProviderState) => {
-    if (onProviderStateChange) {
-      onProviderStateChange(providerId, state);
-    }
+const ProviderList: React.FC = () => {
+  const [connectingProvider, setConnectingProvider] = useState<CloudProvider | null>(null);
+  
+  // Get all available providers
+  const { data: providers, isLoading: isLoadingProviders, error: providersError } = useQuery({
+    queryKey: ["/api/providers"],
+    queryFn: () => providersApi.getSupportedProviders(),
+  });
+  
+  // Get user's connected providers
+  const { data: userProviders, isLoading: isLoadingUserProviders, error: userProvidersError } = useQuery({
+    queryKey: ["/api/providers/user"],
+    queryFn: () => providersApi.getUserProviders(),
+  });
+  
+  const handleConnectProvider = (provider: CloudProvider) => {
+    setConnectingProvider(provider);
   };
   
+  const handleCloseModal = () => {
+    setConnectingProvider(null);
+  };
+  
+  if (isLoadingProviders || isLoadingUserProviders) {
+    return (
+      <div className="space-y-3">
+        <Skeleton className="h-16 w-full rounded-lg" />
+        <Skeleton className="h-16 w-full rounded-lg" />
+        <Skeleton className="h-16 w-full rounded-lg" />
+      </div>
+    );
+  }
+  
+  if (providersError || userProvidersError) {
+    return (
+      <Alert variant="destructive">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>
+          Failed to load cloud providers. Please try again later.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+  
+  if (!providers || providers.length === 0) {
+    return (
+      <Alert>
+        <AlertTitle>No providers available</AlertTitle>
+        <AlertDescription>
+          There are no cloud storage providers available at this time.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+  
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle>Cloud Providers</CardTitle>
-        <CardDescription>
-          Manage your connected cloud storage providers
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {providers.length === 0 ? (
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              No cloud providers available. Please connect a provider to get started.
-            </p>
-          ) : (
-            providers.map((provider) => (
-              <ProviderToggle
-                key={provider.id}
-                providerId={provider.id}
-                initialState={provider.state || (provider.connected ? "connected" : "disabled")}
-                onStateChange={(state) => handleStateChange(provider.id, state)}
-              />
-            ))
-          )}
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-3">
+      {providers.map((provider) => {
+        const userProvider = userProviders?.find(
+          (up) => up.providerId === provider.id
+        );
+        
+        return (
+          <ProviderToggle
+            key={provider.id}
+            provider={provider}
+            userProvider={userProvider}
+            onConnect={() => handleConnectProvider(provider)}
+          />
+        );
+      })}
+      
+      {connectingProvider && (
+        <ProviderConnectionModal
+          provider={connectingProvider}
+          isOpen={!!connectingProvider}
+          onClose={handleCloseModal}
+        />
+      )}
+    </div>
   );
 };
 

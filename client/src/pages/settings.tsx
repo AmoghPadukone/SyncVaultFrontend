@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Save, User, KeyRound, Bell, Moon, Sun, LogOut } from "lucide-react";
+import { Loader2, Save, User, KeyRound, Bell, Moon, Sun, LogOut, Cloud, Database, HardDrive } from "lucide-react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +18,10 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "next-themes";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Progress } from "@/components/ui/progress";
+import { useQuery } from "@tanstack/react-query";
+import { providersApi } from "@/api/providers";
+import ProviderList from "@/components/providers/ProviderList";
 
 // Profile form schema
 const profileSchema = z.object({
@@ -119,6 +123,10 @@ const Settings: React.FC = () => {
               <TabsTrigger value="notifications" className="flex items-center">
                 <Bell className="h-4 w-4 mr-2" />
                 Notifications
+              </TabsTrigger>
+              <TabsTrigger value="providers" className="flex items-center">
+                <Cloud className="h-4 w-4 mr-2" />
+                Cloud Providers
               </TabsTrigger>
             </TabsList>
             
