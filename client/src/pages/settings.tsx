@@ -500,6 +500,86 @@ const Settings: React.FC = () => {
                 </CardFooter>
               </Card>
             </TabsContent>
+            
+            <TabsContent value="providers">
+              <div className="grid gap-6 lg:grid-cols-1">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Storage Usage</CardTitle>
+                    <CardDescription>
+                      Your cloud storage usage across all providers
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6">
+                      <div>
+                        <div className="flex justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <Cloud className="h-5 w-5 text-blue-500" />
+                            <span className="text-sm font-medium">Total Storage</span>
+                          </div>
+                          <span className="text-sm text-gray-500">
+                            4.2 GB of 15 GB
+                          </span>
+                        </div>
+                        <Progress value={28} className="h-2" />
+                      </div>
+                      
+                      <div>
+                        <div className="flex justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <Database className="h-5 w-5 text-orange-500" />
+                            <span className="text-sm font-medium">Amazon S3</span>
+                          </div>
+                          <span className="text-sm text-gray-500">
+                            2.1 GB of 5 GB
+                          </span>
+                        </div>
+                        <Progress value={42} className="h-2" />
+                      </div>
+                      
+                      <div>
+                        <div className="flex justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <HardDrive className="h-5 w-5 text-blue-600" />
+                            <span className="text-sm font-medium">Google Drive</span>
+                          </div>
+                          <span className="text-sm text-gray-500">
+                            1.5 GB of 5 GB
+                          </span>
+                        </div>
+                        <Progress value={30} className="h-2" />
+                      </div>
+                      
+                      <div>
+                        <div className="flex justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <Cloud className="h-5 w-5 text-blue-700" />
+                            <span className="text-sm font-medium">Microsoft Azure</span>
+                          </div>
+                          <span className="text-sm text-gray-500">
+                            0.6 GB of 5 GB
+                          </span>
+                        </div>
+                        <Progress value={12} className="h-2" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Cloud Providers</CardTitle>
+                    <CardDescription>
+                      Manage your cloud storage connections
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ProviderList />
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
           </Tabs>
         </main>
       </div>
