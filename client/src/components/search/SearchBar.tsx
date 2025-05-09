@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Search, XCircle } from "lucide-react";
+import { Search, XCircle, CalendarIcon, Tag } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import ModeToggle from "@/components/search/ModeToggle";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,25 @@ import { useToast } from "@/hooks/use-toast";
 import NLPPreview from "@/components/search/NLPPreview";
 import { useMutation } from "@tanstack/react-query";
 import { searchApi } from "@/api/search";
+import { AdvancedSearchParams } from "@/lib/schemas/search-schema";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+
+const FILE_TYPE_OPTIONS = [
+  { label: "All Files", value: "all" },
+  { label: "Documents", value: "application/pdf" },
+  { label: "Images", value: "image/" },
+  { label: "Videos", value: "video/" },
+  { label: "Spreadsheets", value: "application/vnd.ms-excel" },
+  { label: "Archives", value: "application/zip" },
+  { label: "Audio", value: "audio/" },
+];
 
 const SearchBar: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -21,6 +40,19 @@ const SearchBar: React.FC = () => {
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  
+  // Advanced search state
+  const [advancedParams, setAdvancedParams] = useState<AdvancedSearchParams>({
+    fileName: "",
+    mimeType: "all",
+    tag: "",
+    isFavorite: false,
+    sizeMin: 0,
+    sizeMax: undefined,
+    sharedOnly: false,
+    createdBefore: undefined,
+    createdAfter: undefined,
+  });
 
   const parseSmartQueryMutation = useMutation({
     mutationFn: (prompt: string) => searchApi.smartSearch(prompt),
@@ -92,10 +124,43 @@ const SearchBar: React.FC = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!searchQuery.trim()) return;
+    // For raw and smart search, we need a query
+    if (searchMode !== "advanced" && !searchQuery.trim()) return;
     
-    // Navigate to search results
-    setLocation(`/search?query=${encodeURIComponent(searchQuery)}&mode=${searchMode}`);
+    // For advanced search, at least one parameter must be set
+    if (searchMode === "advanced") {
+      const hasFilter = advancedParams.fileName || 
+                        advancedParams.tag || 
+                        advancedParams.mimeType !== "all" || 
+                        advancedParams.isFavorite || 
+                        advancedParams.sharedOnly ||
+                        advancedParams.sizeMin > 0 ||
+                        advancedParams.sizeMax ||
+                        advancedParams.createdAfter ||
+                        advancedParams.createdBefore;
+                        
+      if (!hasFilter) return;
+      
+      // Construct URL with all advanced params
+      const params = new URLSearchParams();
+      params.append('mode', searchMode);
+      
+      if (advancedParams.fileName) params.append('fileName', advancedParams.fileName);
+      if (advancedParams.tag) params.append('tag', advancedParams.tag);
+      if (advancedParams.mimeType !== "all") params.append('mimeType', advancedParams.mimeType);
+      if (advancedParams.isFavorite) params.append('isFavorite', String(advancedParams.isFavorite));
+      if (advancedParams.sharedOnly) params.append('sharedOnly', String(advancedParams.sharedOnly));
+      if (advancedParams.sizeMin > 0) params.append('sizeMin', String(advancedParams.sizeMin));
+      if (advancedParams.sizeMax) params.append('sizeMax', String(advancedParams.sizeMax));
+      if (advancedParams.createdAfter) params.append('createdAfter', advancedParams.createdAfter);
+      if (advancedParams.createdBefore) params.append('createdBefore', advancedParams.createdBefore);
+      
+      setLocation(`/search?${params.toString()}`);
+    } else {
+      // Navigate to search results for raw/smart search
+      setLocation(`/search?query=${encodeURIComponent(searchQuery)}&mode=${searchMode}`);
+    }
+    
     setIsExpanded(false);
   };
 
@@ -144,34 +209,197 @@ const SearchBar: React.FC = () => {
             )}
             
             {searchMode === "advanced" && (
-              <div className="mt-2 space-y-2">
-                <Input
-                  type="text"
-                  placeholder="Filter by name"
-                  className="w-full"
-                />
-                <div className="flex flex-wrap gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="text-xs"
+              <div className="mt-4 space-y-4 max-h-[450px] overflow-y-auto pr-2">
+                {/* File Name */}
+                <div className="space-y-2">
+                  <Label htmlFor="fileName">File Name</Label>
+                  <Input
+                    id="fileName"
+                    type="text"
+                    placeholder="Search by file name"
+                    className="w-full"
+                    value={advancedParams.fileName}
+                    onChange={(e) => setAdvancedParams({...advancedParams, fileName: e.target.value})}
+                  />
+                </div>
+                
+                {/* File Type / MIME Type */}
+                <div className="space-y-2">
+                  <Label htmlFor="mimeType">File Type</Label>
+                  <Select
+                    value={advancedParams.mimeType}
+                    onValueChange={(value) => setAdvancedParams({...advancedParams, mimeType: value})}
                   >
-                    Documents
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="text-xs"
-                  >
-                    Images
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="text-xs"
-                  >
-                    This week
-                  </Button>
+                    <SelectTrigger id="mimeType">
+                      <SelectValue placeholder="Select file type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {FILE_TYPE_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {/* Tag */}
+                <div className="space-y-2">
+                  <Label htmlFor="tag">Tag</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="tag"
+                      placeholder="Enter tag"
+                      value={advancedParams.tag}
+                      onChange={(e) => setAdvancedParams({...advancedParams, tag: e.target.value})}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-10 w-10 p-0"
+                    >
+                      <Tag className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                
+                {/* Checkboxes */}
+                <div className="flex flex-col gap-4 sm:flex-row">
+                  {/* Favorite Files Only */}
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="isFavorite"
+                      checked={advancedParams.isFavorite}
+                      onCheckedChange={(checked) => 
+                        setAdvancedParams({...advancedParams, isFavorite: checked === true})
+                      }
+                    />
+                    <Label htmlFor="isFavorite" className="cursor-pointer">Favorites only</Label>
+                  </div>
+                  
+                  {/* Shared Files Only */}
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="sharedOnly"
+                      checked={advancedParams.sharedOnly}
+                      onCheckedChange={(checked) => 
+                        setAdvancedParams({...advancedParams, sharedOnly: checked === true})
+                      }
+                    />
+                    <Label htmlFor="sharedOnly" className="cursor-pointer">Shared files only</Label>
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                {/* File Size Range */}
+                <div className="space-y-2">
+                  <Label htmlFor="fileSize">File Size (in bytes)</Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="sizeMin">Min Size</Label>
+                      <Input
+                        id="sizeMin"
+                        type="number"
+                        min={0}
+                        placeholder="Min size"
+                        value={advancedParams.sizeMin || ''}
+                        onChange={(e) => setAdvancedParams({
+                          ...advancedParams, 
+                          sizeMin: e.target.value ? parseInt(e.target.value) : 0
+                        })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="sizeMax">Max Size</Label>
+                      <Input
+                        id="sizeMax"
+                        type="number"
+                        min={0}
+                        placeholder="Max size"
+                        value={advancedParams.sizeMax || ''}
+                        onChange={(e) => setAdvancedParams({
+                          ...advancedParams, 
+                          sizeMax: e.target.value ? parseInt(e.target.value) : undefined
+                        })}
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                {/* Created Date Range */}
+                <div className="space-y-2">
+                  <Label>Created Date Range</Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="createdAfter">From</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            id="createdAfter"
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-start text-left font-normal",
+                              !advancedParams.createdAfter && "text-muted-foreground"
+                            )}
+                          >
+                            {advancedParams.createdAfter ? (
+                              format(new Date(advancedParams.createdAfter), "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={advancedParams.createdAfter ? new Date(advancedParams.createdAfter) : undefined}
+                            onSelect={(date) => setAdvancedParams({
+                              ...advancedParams,
+                              createdAfter: date ? date.toISOString() : undefined
+                            })}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    <div>
+                      <Label htmlFor="createdBefore">To</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            id="createdBefore"
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-start text-left font-normal",
+                              !advancedParams.createdBefore && "text-muted-foreground"
+                            )}
+                          >
+                            {advancedParams.createdBefore ? (
+                              format(new Date(advancedParams.createdBefore), "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={advancedParams.createdBefore ? new Date(advancedParams.createdBefore) : undefined}
+                            onSelect={(date) => setAdvancedParams({
+                              ...advancedParams,
+                              createdBefore: date ? date.toISOString() : undefined
+                            })}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
