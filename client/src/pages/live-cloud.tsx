@@ -33,17 +33,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { CloudIcon, LinkIcon, PlusCircle, AlertCircle, XCircle, Loader2, Cloud } from "lucide-react";
-import { SiGoogledrive, SiDropbox, SiBox } from "react-icons/si";
+import { CloudIcon, LinkIcon, PlusCircle, AlertCircle, XCircle, Loader2 } from "lucide-react";
 import ProviderIcon from "@/components/common/ProviderIcon";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import CloudProviderForm from "@/components/forms/CloudProviderForm";
 
 const LiveCloud: React.FC = () => {
   const [isConnectDialogOpen, setIsConnectDialogOpen] = useState(false);
   const [isDisconnectDialogOpen, setIsDisconnectDialogOpen] = useState(false);
   const [selectedProviderId, setSelectedProviderId] = useState<number | null>(null);
+  const [isProviderModalOpen, setIsProviderModalOpen] = useState(false);
   const { toast } = useToast();
 
   // Fetch supported providers

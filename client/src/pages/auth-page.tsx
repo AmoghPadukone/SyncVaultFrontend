@@ -48,6 +48,12 @@ const AuthPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("login");
   const { user, loginMutation, registerMutation } = useAuth();
   const [_, setLocation] = useLocation();
+  const { toast } = useToast();
+  
+  // State for provider modal
+  const [selectedProvider, setSelectedProvider] = useState<number | null>(null);
+  const [isProviderModalOpen, setIsProviderModalOpen] = useState(false);
+  const [newUserData, setNewUserData] = useState<any>(null);
 
   // Redirect to home if user is already logged in
   useEffect(() => {
@@ -55,14 +61,37 @@ const AuthPage: React.FC = () => {
       setLocation("/");
     }
   }, [user, setLocation]);
-  // if (user) {
-  //   return <Redirect to="/" />;
-  // }
 
   // Get supported cloud providers
   const { data: providers = [] } = useQuery({
     queryKey: ["/api/providers"],
     queryFn: providersApi.getSupportedProviders,
+  });
+  
+  // Connect provider mutation
+  const connectProviderMutation = useMutation({
+    mutationFn: ({ providerId, connectionInfo }: { providerId: number, connectionInfo: any }) => 
+      providersApi.connectProvider(providerId, connectionInfo),
+    onSuccess: () => {
+      toast({
+        title: "Cloud provider connected successfully",
+        description: "Your cloud storage has been connected to SyncVault",
+      });
+      // Close the modal and redirect to dashboard on successful connection
+      setIsProviderModalOpen(false);
+      if (newUserData) {
+        // If we have pending user data, register the user now
+        registerMutation.mutate(newUserData);
+        setNewUserData(null);
+      }
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to connect cloud provider",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
   // Login form
@@ -98,7 +127,31 @@ const AuthPage: React.FC = () => {
 
   const onSignupSubmit = (data: SignupFormValues) => {
     const { confirmPassword, terms, ...signupData } = data;
-    registerMutation.mutate(signupData);
+    
+    // If providers are selected, show provider form for first provider
+    if (signupData.providers && signupData.providers.length > 0) {
+      // Store user data for later registration
+      setNewUserData(signupData);
+      // Show modal for first provider
+      setSelectedProvider(signupData.providers[0]);
+      setIsProviderModalOpen(true);
+    } else {
+      // No providers selected, proceed with registration
+      registerMutation.mutate(signupData);
+    }
+  };
+  
+  // Handle cloud provider details submission
+  const handleProviderSubmit = (providerId: number, providerData: any) => {
+    connectProviderMutation.mutate({
+      providerId,
+      connectionInfo: {
+        accessKey: providerData.accessKey,
+        metadata: {
+          bucketName: providerData.bucketName
+        }
+      }
+    });
   };
 
   return (
@@ -308,9 +361,7 @@ const AuthPage: React.FC = () => {
                                   htmlFor={`provider-${provider.id}`}
                                   className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300"
                                 >
-                                  {provider.type === "google-drive" && <SiGoogledrive className="mr-2 text-yellow-500" />}
-                                  {provider.type === "dropbox" && <SiDropbox className="mr-2 text-blue-500" />}
-                                  {provider.type === "onedrive" && <Cloud className="mr-2 text-blue-600" />}
+                                  <ProviderIcon provider={provider.type} className="mr-2" />
                                   {provider.name}
                                 </label>
                               </FormItem>
@@ -369,6 +420,17 @@ const AuthPage: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
+      
+      {/* Cloud Provider Modal */}
+      {selectedProvider !== null && (
+        <CloudProviderForm
+          open={isProviderModalOpen}
+          onOpenChange={setIsProviderModalOpen}
+          provider={providers.find(p => p.id === selectedProvider) || providers[0]}
+          onSubmit={handleProviderSubmit}
+          isSubmitting={connectProviderMutation.isPending}
+        />
+      )}
     </div>
   );
 };
