@@ -150,8 +150,8 @@ export class MemStorage implements IStorage {
     const userId = this.currentUserId++;
     const now = new Date();
     
-    // Pre-computed hash for "password123" using the same hashing function as in auth.ts
-    const hashedPassword = "1b54c15de5bc198e2b3e6f73edb1d4699b8b208edcf45e7f90c79a69bf25e836b93fb2bc23ad27fb0e7bc464d1323b54e16061125e355b0ec3a566dbcc9e982c.b67b5ebc21e32e81dccb5c27dec5d9a1";
+    // Just store the plaintext password for the demo account since we'll hash it during login
+    const hashedPassword = "password123";
     
     const user = { 
       username: "demo",

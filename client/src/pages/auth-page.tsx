@@ -10,10 +10,12 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Cloud } from "lucide-react";
-import { SiGoogledrive, SiDropbox } from "react-icons/si";
-import { useQuery } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { providersApi } from "@/api/providers";
+import { useToast } from "@/hooks/use-toast";
+import CloudProviderForm from "@/components/forms/CloudProviderForm";
+import ProviderIcon from "@/components/common/ProviderIcon";
 
 // Login form schema
 const loginSchema = z.object({
