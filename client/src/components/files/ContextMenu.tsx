@@ -1,29 +1,28 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Copy, Move, ClipboardCopy, Edit, Trash, Eye, Download, Star, Share, Info } from "lucide-react";
-import { File, Folder } from "@shared/schema";
+import React, { useEffect, useRef } from "react";
+import { Folder, File } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
+import { Copy, Download, ExternalLink, Info, Pencil, Share2, Trash2, UploadCloud } from "lucide-react";
 
 interface ContextMenuProps {
   x: number;
   y: number;
-  item: File | Folder;
-  itemType: "file" | "folder";
+  item: Folder | File;
+  itemType: "folder" | "file";
   onClose: () => void;
-  onOpenDetails: (item: File | Folder) => void;
+  onOpenDetails: () => void;
 }
 
-const ContextMenu: React.FC<ContextMenuProps> = ({ 
-  x, 
-  y, 
-  item, 
-  itemType, 
+const ContextMenu: React.FC<ContextMenuProps> = ({
+  x,
+  y,
+  item,
+  itemType,
   onClose,
   onOpenDetails
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   
-  // Handle click outside to close menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -36,22 +35,32 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [onClose]);
-  
-  // Position adjustments if menu would go off screen
-  const adjustedX = x + 240 > window.innerWidth ? x - 240 : x;
-  const adjustedY = y + 320 > window.innerHeight ? y - 320 : y;
-  
-  const handleOperation = (operation: string) => {
-    if (operation === "details") {
-      onOpenDetails(item);
-      onClose();
-      return;
-    }
+
+  // Adjust position to ensure menu stays within viewport
+  const adjustedPosition = () => {
+    if (!menuRef.current) return { top: y, left: x };
     
-    // For now, just show a toast for each operation
+    const menuWidth = menuRef.current.offsetWidth;
+    const menuHeight = menuRef.current.offsetHeight;
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    
+    const adjustedX = x + menuWidth > windowWidth ? windowWidth - menuWidth - 10 : x;
+    const adjustedY = y + menuHeight > windowHeight ? windowHeight - menuHeight - 10 : y;
+    
+    return {
+      top: adjustedY,
+      left: adjustedX
+    };
+  };
+  
+  const position = adjustedPosition();
+  
+  const handleActionClick = (action: string) => {
+    // Placeholder for actions - to be implemented
     toast({
-      title: `${operation.charAt(0).toUpperCase() + operation.slice(1)}`,
-      description: `${operation.charAt(0).toUpperCase() + operation.slice(1)} ${itemType} "${item.name}" - This feature is coming soon!`,
+      title: "Action triggered",
+      description: `${action} action on ${itemType} "${item.name}"`,
     });
     onClose();
   };
@@ -59,78 +68,81 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
   return (
     <div 
       ref={menuRef}
-      className="absolute min-w-[180px] bg-white dark:bg-gray-800 rounded-md shadow-lg p-1 z-50 border border-gray-200 dark:border-gray-700"
-      style={{ left: adjustedX, top: adjustedY }}
+      className="fixed z-50 bg-white dark:bg-gray-800 shadow-md rounded-md overflow-hidden border border-gray-200 dark:border-gray-700 min-w-[180px]"
+      style={{ top: position.top, left: position.left }}
     >
-      <div className="px-2 py-1.5 text-sm font-medium text-gray-800 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 mb-1">
-        {item.name}
-      </div>
-      
       <div className="py-1">
-        <button 
-          className="flex items-center w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm"
-          onClick={() => handleOperation("open")}
-        >
-          <Eye className="w-4 h-4 mr-2" />
-          Open
-        </button>
+        {itemType === "file" && (
+          <>
+            <button
+              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              onClick={() => handleActionClick("Open")}
+            >
+              <ExternalLink className="w-4 h-4 mr-2" />
+              Open
+            </button>
+            <button
+              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              onClick={() => handleActionClick("Download")}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download
+            </button>
+          </>
+        )}
         
-        <button 
-          className="flex items-center w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm"
-          onClick={() => handleOperation("copy")}
+        <button
+          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+          onClick={() => handleActionClick("Copy")}
         >
           <Copy className="w-4 h-4 mr-2" />
           Copy
         </button>
         
-        <button 
-          className="flex items-center w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm"
-          onClick={() => handleOperation("move")}
+        <button
+          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+          onClick={() => handleActionClick("Rename")}
         >
-          <Move className="w-4 h-4 mr-2" />
-          Move
-        </button>
-        
-        <button 
-          className="flex items-center w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm"
-          onClick={() => handleOperation("rename")}
-        >
-          <Edit className="w-4 h-4 mr-2" />
+          <Pencil className="w-4 h-4 mr-2" />
           Rename
         </button>
         
-        <button 
-          className="flex items-center w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm"
-          onClick={() => handleOperation("download")}
+        {itemType === "file" && (
+          <button
+            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+            onClick={() => handleActionClick("Share")}
+          >
+            <Share2 className="w-4 h-4 mr-2" />
+            Share
+          </button>
+        )}
+        
+        <div className="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+        
+        <button
+          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+          onClick={() => handleActionClick("Move to cloud")}
         >
-          <Download className="w-4 h-4 mr-2" />
-          Download
+          <UploadCloud className="w-4 h-4 mr-2" />
+          Move to cloud
         </button>
         
-        <button 
-          className="flex items-center w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm"
-          onClick={() => handleOperation("share")}
+        <button
+          className="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+          onClick={() => handleActionClick("Delete")}
         >
-          <Share className="w-4 h-4 mr-2" />
-          Share
+          <Trash2 className="w-4 h-4 mr-2" />
+          Delete
         </button>
         
-        <div className="my-1 border-t border-gray-200 dark:border-gray-700"></div>
+        <div className="border-t border-gray-200 dark:border-gray-700 my-1"></div>
         
-        <button 
-          className="flex items-center w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm"
-          onClick={() => handleOperation("details")}
+        <button
+          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+          onClick={onOpenDetails}
         >
           <Info className="w-4 h-4 mr-2" />
           Details
-        </button>
-        
-        <button 
-          className="flex items-center w-full px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm"
-          onClick={() => handleOperation("delete")}
-        >
-          <Trash className="w-4 h-4 mr-2" />
-          Delete
         </button>
       </div>
     </div>

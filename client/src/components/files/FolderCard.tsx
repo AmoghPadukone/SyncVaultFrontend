@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Folder } from "@shared/schema";
-import { Card } from "@/components/ui/card";
-import { useLocation } from "wouter";
-import { useToast } from "@/hooks/use-toast";
-import { FolderIcon } from "lucide-react";
-import DetailsSidebar from "./DetailsSidebar";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { Folder as FolderIcon } from "lucide-react";
+import { Link } from "wouter";
 import ContextMenu from "./ContextMenu";
+import DetailsSidebar from "./DetailsSidebar";
 
 interface FolderCardProps {
   folder: Folder;
@@ -13,101 +13,123 @@ interface FolderCardProps {
   fileCount?: number;
 }
 
-const FolderCard: React.FC<FolderCardProps> = ({ 
-  folder, 
+const FolderCard: React.FC<FolderCardProps> = ({
+  folder,
   view = "grid",
   fileCount = 0
 }) => {
-  const [_, setLocation] = useLocation();
-  const { toast } = useToast();
-  const [showContextMenu, setShowContextMenu] = useState(false);
-  const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
-  const [showDetailsSidebar, setShowDetailsSidebar] = useState(false);
-
-  const navigateToFolder = () => {
-    setLocation(`/folder/${folder.id}`);
-  };
-
-  const handleContextMenu = (e: React.MouseEvent) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  
+  const handleRightClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    setContextMenuPosition({ x: e.clientX, y: e.clientY });
-    setShowContextMenu(true);
+    setContextMenu({ x: e.clientX, y: e.clientY });
   };
-
+  
+  const handleCloseContextMenu = () => {
+    setContextMenu(null);
+  };
+  
   const handleOpenDetails = () => {
-    setShowDetailsSidebar(true);
+    setDetailsOpen(true);
+    handleCloseContextMenu();
   };
-
+  
+  const formattedDate = folder.createdAt 
+    ? format(new Date(folder.createdAt), "MMM d, yyyy")
+    : "Unknown date";
+  
   if (view === "list") {
     return (
       <>
-        <div 
-          className="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-900 rounded-md cursor-pointer"
-          onClick={navigateToFolder}
-          onContextMenu={handleContextMenu}
-        >
-          <div className="flex-shrink-0 text-yellow-500 dark:text-yellow-400">
-            <FolderIcon size={20} />
+        <Link href={`/drive/folder/${folder.id}`}>
+          <div
+            className={cn(
+              "group flex items-center py-2 px-4 rounded-md cursor-pointer transition-colors",
+              "hover:bg-gray-100 dark:hover:bg-gray-800",
+              isHovered && "bg-gray-100 dark:bg-gray-800"
+            )}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            onContextMenu={handleRightClick}
+          >
+            <div className="flex items-center flex-grow min-w-0">
+              <div className="flex-shrink-0 w-10 flex justify-center">
+                <FolderIcon className="h-6 w-6 text-blue-500" />
+              </div>
+              <div className="ml-4 flex-grow min-w-0">
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{folder.name}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{fileCount} items</p>
+              </div>
+            </div>
+            <div className="hidden sm:block flex-shrink-0 w-32 text-right">
+              <p className="text-xs text-gray-500 dark:text-gray-400">{formattedDate}</p>
+            </div>
           </div>
-          <div className="ml-3 flex-1 overflow-hidden">
-            <p className="text-sm font-medium text-gray-900 truncate dark:text-gray-100">{folder.name}</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">{fileCount} files</p>
-          </div>
-        </div>
+        </Link>
         
-        {showContextMenu && (
-          <ContextMenu 
-            x={contextMenuPosition.x} 
-            y={contextMenuPosition.y} 
-            item={folder} 
-            itemType="folder" 
-            onClose={() => setShowContextMenu(false)}
+        {contextMenu && (
+          <ContextMenu
+            x={contextMenu.x}
+            y={contextMenu.y}
+            item={folder}
+            itemType="folder"
+            onClose={handleCloseContextMenu}
             onOpenDetails={handleOpenDetails}
           />
         )}
         
-        <DetailsSidebar 
-          item={folder} 
-          itemType="folder" 
-          isOpen={showDetailsSidebar} 
-          onClose={() => setShowDetailsSidebar(false)} 
+        <DetailsSidebar
+          item={folder}
+          itemType="folder"
+          isOpen={detailsOpen}
+          onClose={() => setDetailsOpen(false)}
         />
       </>
     );
   }
-
+  
+  // Grid view
   return (
     <>
-      <Card 
-        className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-        onClick={navigateToFolder}
-        onContextMenu={handleContextMenu}
-      >
-        <div className="flex items-center p-4">
-          <FolderIcon className="h-10 w-10 text-yellow-500 dark:text-yellow-400" />
-          <div className="ml-3">
-            <p className="text-sm font-medium text-gray-900 truncate dark:text-gray-100">{folder.name}</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">{fileCount} files</p>
+      <Link href={`/drive/folder/${folder.id}`}>
+        <div
+          className={cn(
+            "group relative flex flex-col items-center p-4 rounded-md cursor-pointer transition-colors",
+            "hover:bg-gray-100 dark:hover:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700",
+            isHovered && "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+          )}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          onContextMenu={handleRightClick}
+        >
+          <div className="w-full flex justify-center items-center h-20 mb-4">
+            <FolderIcon className="h-12 w-12 text-blue-500" />
+          </div>
+          <div className="w-full">
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 text-center truncate">{folder.name}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 text-center">{fileCount} items</p>
           </div>
         </div>
-      </Card>
+      </Link>
       
-      {showContextMenu && (
-        <ContextMenu 
-          x={contextMenuPosition.x} 
-          y={contextMenuPosition.y} 
-          item={folder} 
-          itemType="folder" 
-          onClose={() => setShowContextMenu(false)}
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          item={folder}
+          itemType="folder"
+          onClose={handleCloseContextMenu}
           onOpenDetails={handleOpenDetails}
         />
       )}
       
-      <DetailsSidebar 
-        item={folder} 
-        itemType="folder" 
-        isOpen={showDetailsSidebar} 
-        onClose={() => setShowDetailsSidebar(false)} 
+      <DetailsSidebar
+        item={folder}
+        itemType="folder"
+        isOpen={detailsOpen}
+        onClose={() => setDetailsOpen(false)}
       />
     </>
   );

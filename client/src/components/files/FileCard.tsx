@@ -1,187 +1,154 @@
-import React from "react";
+import React, { useState } from "react";
 import { File } from "@shared/schema";
-import FileIcon from "@/components/common/FileIcon";
-import { formatBytes } from "@/utils/format-bytes";
-import { formatDate } from "@/utils/format-date";
-import { Card, CardContent } from "@/components/ui/card";
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu";
-import { Download, Pencil, Share2, TrashIcon, MoreHorizontal, Folders } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
-import { filesApi } from "@/api/files";
-import { queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { getFileTypeIcon, getReadableFileSize } from "@/utils/file-utils";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import ContextMenu from "./ContextMenu";
+import DetailsSidebar from "./DetailsSidebar";
+import ProviderIcon from "@/components/common/ProviderIcon";
 
 interface FileCardProps {
   file: File;
   view?: "grid" | "list";
-  onFileClick?: (file: File) => void;
+  onSelect?: (file: File) => void;
 }
 
-const FileCard: React.FC<FileCardProps> = ({ file, view = "grid", onFileClick }) => {
-  const { toast } = useToast();
+const FileCard: React.FC<FileCardProps> = ({ 
+  file, 
+  view = "grid",
+  onSelect
+}) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   
-  const deleteMutation = useMutation({
-    mutationFn: (fileId: number) => filesApi.deleteFile(fileId),
-    onSuccess: () => {
-      toast({
-        title: "File deleted",
-        description: "The file has been deleted successfully",
-      });
-      // Invalidate queries to refresh file lists
-      queryClient.invalidateQueries({ queryKey: ["/api/folders/contents"] });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error deleting file",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleDelete = () => {
-    deleteMutation.mutate(file.id);
+  const handleRightClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setContextMenu({ x: e.clientX, y: e.clientY });
   };
-
-  const handleShare = async () => {
-    try {
-      const shareInfo = await filesApi.generateShareLink(file.id);
-      
-      // Copy to clipboard
-      await navigator.clipboard.writeText(shareInfo.url);
-      
-      toast({
-        title: "Link copied to clipboard",
-        description: "Share link has been generated and copied to your clipboard",
-      });
-    } catch (error) {
-      toast({
-        title: "Error sharing file",
-        description: "Could not generate share link",
-        variant: "destructive",
-      });
+  
+  const handleCloseContextMenu = () => {
+    setContextMenu(null);
+  };
+  
+  const handleOpenDetails = () => {
+    setDetailsOpen(true);
+    handleCloseContextMenu();
+  };
+  
+  const handleSelect = () => {
+    if (onSelect) {
+      onSelect(file);
     }
   };
-
-  const handleDownload = () => {
-    // In a real app, you would initiate a download here
-    toast({
-      title: "Download started",
-      description: `Downloading ${file.name}...`,
-    });
-  };
-
-  const handleRename = () => {
-    // In a real app, you would show a rename dialog here
-    toast({
-      title: "Rename",
-      description: "Rename functionality would be implemented here",
-    });
-  };
-
-  const handleMove = () => {
-    // In a real app, you would show a folder selection dialog here
-    toast({
-      title: "Move",
-      description: "Move functionality would be implemented here",
-    });
-  };
-
+  
+  const formattedDate = file.createdAt 
+    ? format(new Date(file.createdAt), "MMM d, yyyy")
+    : "Unknown date";
+  
+  const formattedSize = getReadableFileSize(file.size);
+  
   if (view === "list") {
     return (
-      <ContextMenu>
-        <ContextMenuTrigger>
-          <div 
-            className="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-900 rounded-md cursor-pointer"
-            onClick={() => onFileClick && onFileClick(file)}
-          >
-            <div className="flex-shrink-0">
-              <FileIcon mimeType={file.mimeType || "application/octet-stream"} size={20} />
+      <>
+        <div
+          className={cn(
+            "group flex items-center py-2 px-4 rounded-md cursor-pointer transition-colors",
+            "hover:bg-gray-100 dark:hover:bg-gray-800",
+            isHovered && "bg-gray-100 dark:bg-gray-800"
+          )}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          onContextMenu={handleRightClick}
+          onClick={handleSelect}
+        >
+          <div className="flex items-center flex-grow min-w-0">
+            <div className="flex-shrink-0 w-10 flex justify-center">
+              {getFileTypeIcon(file.mimeType, "h-6 w-6")}
             </div>
-            <div className="ml-3 flex-1 overflow-hidden">
-              <p className="text-sm font-medium text-gray-900 truncate dark:text-gray-100">{file.name}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {formatBytes(file.size || 0)} • {formatDate(file.updatedAt || new Date())}
-              </p>
+            <div className="ml-4 flex-grow min-w-0">
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{file.name}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{formattedSize}</p>
             </div>
           </div>
-        </ContextMenuTrigger>
-        <ContextMenuContent>
-          <ContextMenuItem onClick={handleDownload}>
-            <Download className="mr-2 h-4 w-4" />
-            <span>Download</span>
-          </ContextMenuItem>
-          <ContextMenuItem onClick={handleRename}>
-            <Pencil className="mr-2 h-4 w-4" />
-            <span>Rename</span>
-          </ContextMenuItem>
-          <ContextMenuItem onClick={handleShare}>
-            <Share2 className="mr-2 h-4 w-4" />
-            <span>Share</span>
-          </ContextMenuItem>
-          <ContextMenuItem onClick={handleMove}>
-            <Folders className="mr-2 h-4 w-4" />
-            <span>Move</span>
-          </ContextMenuItem>
-          <ContextMenuItem onClick={handleDelete} className="text-red-600 dark:text-red-400">
-            <TrashIcon className="mr-2 h-4 w-4" />
-            <span>Delete</span>
-          </ContextMenuItem>
-        </ContextMenuContent>
-      </ContextMenu>
+          <div className="hidden sm:block flex-shrink-0 w-32 text-right">
+            <p className="text-xs text-gray-500 dark:text-gray-400">{formattedDate}</p>
+          </div>
+          {file.providerId && (
+            <div className="hidden md:flex flex-shrink-0 w-10 items-center justify-center">
+              <ProviderIcon providerId={file.providerId} size="small" />
+            </div>
+          )}
+        </div>
+        
+        {contextMenu && (
+          <ContextMenu
+            x={contextMenu.x}
+            y={contextMenu.y}
+            item={file}
+            itemType="file"
+            onClose={handleCloseContextMenu}
+            onOpenDetails={handleOpenDetails}
+          />
+        )}
+        
+        <DetailsSidebar
+          item={file}
+          itemType="file"
+          isOpen={detailsOpen}
+          onClose={() => setDetailsOpen(false)}
+        />
+      </>
     );
   }
-
+  
+  // Grid view
   return (
-    <ContextMenu>
-      <ContextMenuTrigger>
-        <Card 
-          className="hover:shadow-md transition-shadow cursor-pointer"
-          onClick={() => onFileClick && onFileClick(file)}
-        >
-          <div className="aspect-w-3 aspect-h-2 bg-gray-200 dark:bg-gray-800">
-            <div className="flex items-center justify-center h-24 bg-blue-50 dark:bg-blue-900/20">
-              <FileIcon mimeType={file.mimeType || "application/octet-stream"} size={48} />
-            </div>
-            {file.thumbnailUrl && (
-              <img
-                src={file.thumbnailUrl}
-                alt={file.name}
-                className="object-cover h-24 w-full"
-              />
-            )}
+    <>
+      <div
+        className={cn(
+          "group relative flex flex-col items-center p-4 rounded-md cursor-pointer transition-colors",
+          "hover:bg-gray-100 dark:hover:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700",
+          isHovered && "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+        )}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onContextMenu={handleRightClick}
+        onClick={handleSelect}
+      >
+        <div className="w-full flex justify-center items-center h-20 mb-4">
+          {getFileTypeIcon(file.mimeType, "h-12 w-12")}
+        </div>
+        <div className="w-full">
+          <p className="text-sm font-medium text-gray-900 dark:text-gray-100 text-center truncate">{file.name}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 text-center">{formattedSize}</p>
+        </div>
+        
+        {file.providerId && (
+          <div className="absolute top-2 right-2">
+            <ProviderIcon providerId={file.providerId} size="small" />
           </div>
-          <CardContent className="p-3">
-            <h4 className="text-sm font-medium text-gray-900 truncate dark:text-gray-100">{file.name}</h4>
-            <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">
-              {formatBytes(file.size || 0)} • {formatDate(file.updatedAt || new Date())}
-            </p>
-          </CardContent>
-        </Card>
-      </ContextMenuTrigger>
-      <ContextMenuContent>
-        <ContextMenuItem onClick={handleDownload}>
-          <Download className="mr-2 h-4 w-4" />
-          <span>Download</span>
-        </ContextMenuItem>
-        <ContextMenuItem onClick={handleRename}>
-          <Pencil className="mr-2 h-4 w-4" />
-          <span>Rename</span>
-        </ContextMenuItem>
-        <ContextMenuItem onClick={handleShare}>
-          <Share2 className="mr-2 h-4 w-4" />
-          <span>Share</span>
-        </ContextMenuItem>
-        <ContextMenuItem onClick={handleMove}>
-          <Folders className="mr-2 h-4 w-4" />
-          <span>Move</span>
-        </ContextMenuItem>
-        <ContextMenuItem onClick={handleDelete} className="text-red-600 dark:text-red-400">
-          <TrashIcon className="mr-2 h-4 w-4" />
-          <span>Delete</span>
-        </ContextMenuItem>
-      </ContextMenuContent>
-    </ContextMenu>
+        )}
+      </div>
+      
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          item={file}
+          itemType="file"
+          onClose={handleCloseContextMenu}
+          onOpenDetails={handleOpenDetails}
+        />
+      )}
+      
+      <DetailsSidebar
+        item={file}
+        itemType="file"
+        isOpen={detailsOpen}
+        onClose={() => setDetailsOpen(false)}
+      />
+    </>
   );
 };
 
