@@ -91,12 +91,27 @@ const ProviderToggle: React.FC<ProviderToggleProps> = ({
           </p>
         </div>
       </div>
-      <div className="flex items-center space-x-2">
-        <Switch 
-          checked={isActive} 
-          onCheckedChange={handleToggleActive}
-          disabled={toggleActiveMutation.isPending || disconnectMutation.isPending}
-        />
+      <div className="flex items-center space-x-4">
+        {isConnected && (
+          <button
+            onClick={() => disconnectMutation.mutate()}
+            disabled={disconnectMutation.isPending}
+            className="text-xs text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+            title="Disconnect provider"
+          >
+            {disconnectMutation.isPending ? 'Disconnecting...' : 'Disconnect'}
+          </button>
+        )}
+        <div className="flex items-center space-x-2">
+          <span className="text-xs text-gray-500 dark:text-gray-400">
+            {isConnected ? 'Use' : 'Connect'}
+          </span>
+          <Switch 
+            checked={isActive} 
+            onCheckedChange={handleToggleActive}
+            disabled={toggleActiveMutation.isPending || disconnectMutation.isPending}
+          />
+        </div>
       </div>
     </div>
   );

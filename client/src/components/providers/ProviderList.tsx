@@ -19,7 +19,7 @@ const ProviderList: React.FC = () => {
   
   // Get user's connected providers
   const { data: userProviders, isLoading: isLoadingUserProviders, error: userProvidersError } = useQuery({
-    queryKey: ["/api/providers/user"],
+    queryKey: ["/api/providers/user-connected"],
     queryFn: () => providersApi.getUserProviders(),
   });
   
@@ -65,7 +65,11 @@ const ProviderList: React.FC = () => {
   }
   
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-medium">Connected Providers</h3>
+      </div>
+      
       {providers.map((provider) => {
         const userProvider = userProviders?.find(
           (up) => up.providerId === provider.id
@@ -80,6 +84,21 @@ const ProviderList: React.FC = () => {
           />
         );
       })}
+      
+      <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <button 
+          onClick={() => setConnectingProvider(providers[0])}
+          className="flex items-center p-3 w-full rounded-lg border border-dashed border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+        >
+          <div className="flex-shrink-0 h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+            <Cloud className="h-5 w-5 text-primary" />
+          </div>
+          <div className="ml-3 text-left">
+            <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">Add New Cloud Provider</h4>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Connect to additional cloud storage services</p>
+          </div>
+        </button>
+      </div>
       
       {connectingProvider && (
         <ProviderConnectionModal

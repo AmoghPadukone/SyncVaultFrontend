@@ -370,9 +370,19 @@ const ProviderConnectionModal: React.FC<ProviderConnectionModalProps> = ({
               <span className="ml-2">Connect to {provider.name}</span>
             </span>
           </DialogTitle>
+          <p className="text-sm text-gray-500 mt-2">
+            Enter your credentials to connect SyncVault with {provider.name}. 
+            All credentials are securely stored and used only for accessing your files.
+          </p>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-md mb-4">
+              <p className="text-sm text-blue-800 dark:text-blue-300">
+                <span className="font-medium">Provider Integration:</span> Connect your {provider.name} account 
+                to sync, browse and manage files directly within SyncVault.
+              </p>
+            </div>
             <div className="space-y-4">
               {renderProviderFields()}
             </div>
