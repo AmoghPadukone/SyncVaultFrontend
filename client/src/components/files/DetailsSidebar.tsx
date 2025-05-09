@@ -1,10 +1,9 @@
 import React from "react";
-import { X, Calendar, HardDrive, File as FileIcon, Folder as FolderIcon, Link, Share2 } from "lucide-react";
+import { X, Calendar, HardDrive, File as FileIcon, Folder as FolderIcon, Link, Share2, Download } from "lucide-react";
 import { File, Folder } from "@shared/schema";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { getFileTypeIcon } from "@/utils/file-utils";
 import ProviderIcon from "@/components/common/ProviderIcon";
 
 interface DetailsSidebarProps {
@@ -37,13 +36,11 @@ const DetailsSidebar: React.FC<DetailsSidebarProps> = ({ item, itemType, isOpen,
   const renderFileTypeSection = () => {
     if (!isFile || !file) return null;
     
-    const Icon = getFileTypeIcon(file.mimeType || "");
-    
     return (
       <div className="flex flex-col p-4 bg-gray-50 dark:bg-gray-800 rounded-lg mb-4">
         <div className="flex items-center">
           <div className="h-8 w-8 mr-3 flex items-center justify-center rounded-md bg-blue-100 dark:bg-blue-900">
-            <Icon className="h-5 w-5 text-blue-600 dark:text-blue-300" />
+            <FileIcon className="h-5 w-5 text-blue-600 dark:text-blue-300" />
           </div>
           <div>
             <h4 className="text-sm font-medium text-gray-800 dark:text-gray-300">
@@ -76,7 +73,7 @@ const DetailsSidebar: React.FC<DetailsSidebarProps> = ({ item, itemType, isOpen,
         <div className="flex items-center mb-6">
           <div className="h-12 w-12 mr-4 flex items-center justify-center rounded-md bg-gray-100 dark:bg-gray-800">
             {isFile ? (
-              getFileTypeIcon((file?.mimeType || ""), "h-7 w-7 text-blue-600 dark:text-blue-400")
+              <FileIcon className="h-7 w-7 text-blue-600 dark:text-blue-400" />
             ) : (
               <FolderIcon className="h-7 w-7 text-amber-500 dark:text-amber-400" />
             )}

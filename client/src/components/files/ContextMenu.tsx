@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Copy, Move, Paste, Edit, Trash, Eye, Download, Star, Share, Info } from "lucide-react";
+import { Copy, Move, ClipboardCopy, Edit, Trash, Eye, Download, Star, Share, Info } from "lucide-react";
 import { File, Folder } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 

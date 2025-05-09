@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { Folder } from "@shared/schema";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { useLocation } from "wouter";
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu";
-import { FolderIcon, Pencil, TrashIcon, Share2, FolderPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { FolderIcon } from "lucide-react";
+import DetailsSidebar from "./DetailsSidebar";
+import ContextMenu from "./ContextMenu";
 
 interface FolderCardProps {
   folder: Folder;
@@ -19,117 +20,96 @@ const FolderCard: React.FC<FolderCardProps> = ({
 }) => {
   const [_, setLocation] = useLocation();
   const { toast } = useToast();
+  const [showContextMenu, setShowContextMenu] = useState(false);
+  const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
+  const [showDetailsSidebar, setShowDetailsSidebar] = useState(false);
 
   const navigateToFolder = () => {
     setLocation(`/folder/${folder.id}`);
   };
 
-  const handleRename = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    toast({
-      title: "Rename",
-      description: "Rename functionality would be implemented here",
-    });
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setContextMenuPosition({ x: e.clientX, y: e.clientY });
+    setShowContextMenu(true);
   };
 
-  const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    toast({
-      title: "Delete",
-      description: "Delete functionality would be implemented here",
-    });
-  };
-
-  const handleShare = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    toast({
-      title: "Share",
-      description: "Share functionality would be implemented here",
-    });
-  };
-
-  const handleCreateSubfolder = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    toast({
-      title: "Create subfolder",
-      description: "Subfolder creation would be implemented here",
-    });
+  const handleOpenDetails = () => {
+    setShowDetailsSidebar(true);
   };
 
   if (view === "list") {
     return (
-      <ContextMenu>
-        <ContextMenuTrigger>
-          <div 
-            className="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-900 rounded-md cursor-pointer"
-            onClick={navigateToFolder}
-          >
-            <div className="flex-shrink-0 text-yellow-500 dark:text-yellow-400">
-              <FolderIcon size={20} />
-            </div>
-            <div className="ml-3 flex-1 overflow-hidden">
-              <p className="text-sm font-medium text-gray-900 truncate dark:text-gray-100">{folder.name}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{fileCount} files</p>
-            </div>
+      <>
+        <div 
+          className="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-900 rounded-md cursor-pointer"
+          onClick={navigateToFolder}
+          onContextMenu={handleContextMenu}
+        >
+          <div className="flex-shrink-0 text-yellow-500 dark:text-yellow-400">
+            <FolderIcon size={20} />
           </div>
-        </ContextMenuTrigger>
-        <ContextMenuContent>
-          <ContextMenuItem onClick={handleRename}>
-            <Pencil className="mr-2 h-4 w-4" />
-            <span>Rename</span>
-          </ContextMenuItem>
-          <ContextMenuItem onClick={handleShare}>
-            <Share2 className="mr-2 h-4 w-4" />
-            <span>Share</span>
-          </ContextMenuItem>
-          <ContextMenuItem onClick={handleCreateSubfolder}>
-            <FolderPlus className="mr-2 h-4 w-4" />
-            <span>Create subfolder</span>
-          </ContextMenuItem>
-          <ContextMenuItem onClick={handleDelete} className="text-red-600 dark:text-red-400">
-            <TrashIcon className="mr-2 h-4 w-4" />
-            <span>Delete</span>
-          </ContextMenuItem>
-        </ContextMenuContent>
-      </ContextMenu>
+          <div className="ml-3 flex-1 overflow-hidden">
+            <p className="text-sm font-medium text-gray-900 truncate dark:text-gray-100">{folder.name}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{fileCount} files</p>
+          </div>
+        </div>
+        
+        {showContextMenu && (
+          <ContextMenu 
+            x={contextMenuPosition.x} 
+            y={contextMenuPosition.y} 
+            item={folder} 
+            itemType="folder" 
+            onClose={() => setShowContextMenu(false)}
+            onOpenDetails={handleOpenDetails}
+          />
+        )}
+        
+        <DetailsSidebar 
+          item={folder} 
+          itemType="folder" 
+          isOpen={showDetailsSidebar} 
+          onClose={() => setShowDetailsSidebar(false)} 
+        />
+      </>
     );
   }
 
   return (
-    <ContextMenu>
-      <ContextMenuTrigger>
-        <Card 
-          className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-          onClick={navigateToFolder}
-        >
-          <div className="flex items-center p-4">
-            <FolderIcon className="h-10 w-10 text-yellow-500 dark:text-yellow-400" />
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-900 truncate dark:text-gray-100">{folder.name}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{fileCount} files</p>
-            </div>
+    <>
+      <Card 
+        className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+        onClick={navigateToFolder}
+        onContextMenu={handleContextMenu}
+      >
+        <div className="flex items-center p-4">
+          <FolderIcon className="h-10 w-10 text-yellow-500 dark:text-yellow-400" />
+          <div className="ml-3">
+            <p className="text-sm font-medium text-gray-900 truncate dark:text-gray-100">{folder.name}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{fileCount} files</p>
           </div>
-        </Card>
-      </ContextMenuTrigger>
-      <ContextMenuContent>
-        <ContextMenuItem onClick={handleRename}>
-          <Pencil className="mr-2 h-4 w-4" />
-          <span>Rename</span>
-        </ContextMenuItem>
-        <ContextMenuItem onClick={handleShare}>
-          <Share2 className="mr-2 h-4 w-4" />
-          <span>Share</span>
-        </ContextMenuItem>
-        <ContextMenuItem onClick={handleCreateSubfolder}>
-          <FolderPlus className="mr-2 h-4 w-4" />
-          <span>Create subfolder</span>
-        </ContextMenuItem>
-        <ContextMenuItem onClick={handleDelete} className="text-red-600 dark:text-red-400">
-          <TrashIcon className="mr-2 h-4 w-4" />
-          <span>Delete</span>
-        </ContextMenuItem>
-      </ContextMenuContent>
-    </ContextMenu>
+        </div>
+      </Card>
+      
+      {showContextMenu && (
+        <ContextMenu 
+          x={contextMenuPosition.x} 
+          y={contextMenuPosition.y} 
+          item={folder} 
+          itemType="folder" 
+          onClose={() => setShowContextMenu(false)}
+          onOpenDetails={handleOpenDetails}
+        />
+      )}
+      
+      <DetailsSidebar 
+        item={folder} 
+        itemType="folder" 
+        isOpen={showDetailsSidebar} 
+        onClose={() => setShowDetailsSidebar(false)} 
+      />
+    </>
   );
 };
 
