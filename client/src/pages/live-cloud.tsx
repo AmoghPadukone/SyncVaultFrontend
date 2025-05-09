@@ -61,17 +61,21 @@ const LiveCloud: React.FC = () => {
 
   // Connect provider mutation
   const connectProviderMutation = useMutation({
-    mutationFn: (providerId: number) => providersApi.connectProvider(providerId, {
-      // In a real app, you'd get these from OAuth flow
-      accessToken: "mock-access-token",
-      refreshToken: "mock-refresh-token",
-    }),
+    mutationFn: ({ providerId, credentials }: { providerId: number; credentials: { accessKey: string; bucketName: string } }) => 
+      providersApi.connectProvider(providerId, {
+        accessToken: credentials.accessKey,
+        refreshToken: '',
+        metadata: {
+          bucketName: credentials.bucketName
+        }
+      }),
     onSuccess: () => {
       toast({
         title: "Cloud provider connected",
         description: "Your cloud storage has been connected successfully",
       });
       setIsConnectDialogOpen(false);
+      setIsProviderModalOpen(false);
       // Invalidate queries to refresh the UI
       queryClient.invalidateQueries({ queryKey: ["/api/providers/user-connected"] });
     },
@@ -106,7 +110,13 @@ const LiveCloud: React.FC = () => {
   });
 
   const handleConnectProvider = (providerId: number) => {
-    connectProviderMutation.mutate(providerId);
+    setSelectedProviderId(providerId);
+    setIsConnectDialogOpen(false);
+    setIsProviderModalOpen(true);
+  };
+  
+  const handleProviderSubmit = (providerId: number, credentials: { accessKey: string; bucketName: string }) => {
+    connectProviderMutation.mutate({ providerId, credentials });
   };
 
   const handleDisconnectProvider = () => {
@@ -348,6 +358,17 @@ const LiveCloud: React.FC = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      
+      {/* Cloud Provider Form Modal */}
+      {selectedProviderId !== null && (
+        <CloudProviderForm
+          open={isProviderModalOpen}
+          onOpenChange={setIsProviderModalOpen}
+          provider={supportedProviders.find(p => p.id === selectedProviderId) || supportedProviders[0]}
+          onSubmit={handleProviderSubmit}
+          isSubmitting={connectProviderMutation.isPending}
+        />
+      )}
     </div>
   );
 };
