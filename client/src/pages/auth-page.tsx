@@ -47,10 +47,10 @@ const AuthPage: React.FC = () => {
   const { user, loginMutation, registerMutation } = useAuth();
   const [_, setLocation] = useLocation();
 
-  // If user is already authenticated, redirect to home
-  if (user) {
-    return <Redirect to="/" />;
-  }
+  // Commenting out redirect to allow viewing the auth page
+  // if (user) {
+  //   return <Redirect to="/" />;
+  // }
 
   // Get supported cloud providers
   const { data: providers = [] } = useQuery({
