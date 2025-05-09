@@ -12,6 +12,7 @@ import Shared from "@/pages/shared";
 import LiveCloud from "@/pages/live-cloud";
 import SearchResults from "@/pages/search-results";
 import Settings from "@/pages/settings";
+import Favorites from "@/pages/favorites";
 import { AuthProvider } from "./hooks/use-auth";
 import { ProtectedRoute } from "./lib/protected-route";
 
@@ -25,6 +26,7 @@ function Router() {
       <ProtectedRoute path="/my-drive" component={MyDrive} />
       <ProtectedRoute path="/drive/folder/:folderId" component={MyDrive} />
       <ProtectedRoute path="/shared" component={Shared} />
+      <ProtectedRoute path="/favorites" component={Favorites} />
       <ProtectedRoute path="/cloud" component={Settings} />
       <ProtectedRoute path="/live-cloud" component={LiveCloud} />
       <ProtectedRoute path="/search" component={SearchResults} />

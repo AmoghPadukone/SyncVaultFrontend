@@ -31,6 +31,11 @@ export const filesApi = {
     const res = await apiRequest("GET", `/api/files/${fileId}/download`);
     return await res.blob();
   },
+  
+  getFavorites: async (): Promise<File[]> => {
+    const res = await apiRequest("GET", "/api/favorites");
+    return await res.json();
+  },
 
   // Favorite operations
   toggleFavorite: async (fileId: number): Promise<File> => {

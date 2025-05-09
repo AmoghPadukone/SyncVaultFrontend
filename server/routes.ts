@@ -370,6 +370,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to retrieve shared files" });
     }
   });
+  
+  // Get user's favorite files
+  app.get("/api/favorites", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const favorites = await storage.getUserFavoriteFiles(req.user.id);
+      res.json(favorites);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to retrieve favorite files" });
+    }
+  });
 
   app.delete("/api/share/:fileId", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
