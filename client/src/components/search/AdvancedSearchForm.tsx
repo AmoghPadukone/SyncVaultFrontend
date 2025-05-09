@@ -41,7 +41,7 @@ const AdvancedSearchForm: React.FC<AdvancedSearchFormProps> = ({
     resolver: zodResolver(AdvancedSearchSchema),
     defaultValues: initialValues || {
       fileName: "",
-      mimeType: "",
+      mimeType: "all",
       tag: "",
       isFavorite: false,
       sizeMin: 0,
@@ -117,10 +117,12 @@ const AdvancedSearchForm: React.FC<AdvancedSearchFormProps> = ({
                     <Button
                       type="button"
                       variant="outline"
-                      className="h-10 w-10 p-0"
-                      onClick={() => {}}
+                      className="h-10 p-0 px-3 flex items-center gap-1"
+                      onClick={() => field.onChange(field.value)}
+                      title="Click to add tag (future functionality)"
                     >
                       <Tag className="h-4 w-4" />
+                      <span className="text-xs">Add Tag</span>
                     </Button>
                   </div>
                 </FormControl>
@@ -302,7 +304,26 @@ const AdvancedSearchForm: React.FC<AdvancedSearchFormProps> = ({
           </div>
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex justify-between">
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={() => {
+              form.reset({
+                fileName: "",
+                mimeType: "all",
+                tag: "",
+                isFavorite: false,
+                sizeMin: 0,
+                sizeMax: undefined,
+                sharedOnly: false,
+                createdBefore: undefined,
+                createdAfter: undefined,
+              });
+            }}
+          >
+            Reset Filters
+          </Button>
           <Button type="submit" disabled={isLoading}>
             {isLoading ? "Searching..." : "Search"}
           </Button>
