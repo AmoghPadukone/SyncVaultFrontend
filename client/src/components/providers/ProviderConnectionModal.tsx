@@ -398,15 +398,25 @@ const ProviderConnectionModal: React.FC<ProviderConnectionModalProps> = ({
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-md mb-4">
-                <p className="text-sm text-blue-800 dark:text-blue-300">
+              <div className={`p-4 rounded-md mb-4 ${
+                  provider.type === 'gcp' ? 'bg-blue-50 dark:bg-blue-950' : 
+                  provider.type === 'aws' ? 'bg-orange-50 dark:bg-orange-950' : 
+                  provider.type === 'azure' ? 'bg-purple-50 dark:bg-purple-950' : 
+                  'bg-blue-50 dark:bg-blue-950'
+                }`}>
+                <p className={`text-sm ${
+                  provider.type === 'gcp' ? 'text-blue-800 dark:text-blue-300' : 
+                  provider.type === 'aws' ? 'text-orange-800 dark:text-orange-300' : 
+                  provider.type === 'azure' ? 'text-purple-800 dark:text-purple-300' : 
+                  'text-blue-800 dark:text-blue-300'
+                }`}>
                   <span className="font-medium">Provider Integration:</span>{' '}
                   {provider.type === 'gcp' ? (
-                    <>Connect your Google Cloud Platform account to sync, browse and manage files directly within SyncVault.</>
+                    <>Connect your Google Cloud Platform account to sync, browse and manage files directly within SyncVault. Your GCP project will need storage permissions configured.</>
                   ) : provider.type === 'aws' ? (
-                    <>Connect your AWS S3 account to sync, browse and manage files directly within SyncVault.</>
+                    <>Connect your AWS S3 account to sync, browse and manage files directly within SyncVault. Make sure your IAM user has S3 access permissions.</>
                   ) : provider.type === 'azure' ? (
-                    <>Connect your Azure Storage account to sync, browse and manage files directly within SyncVault.</>
+                    <>Connect your Azure Storage account to sync, browse and manage files directly within SyncVault. Ensure your storage account has blob containers accessible.</>
                   ) : (
                     <>Connect your {provider.name} account to sync, browse and manage files directly within SyncVault.</>
                   )}
@@ -428,6 +438,12 @@ const ProviderConnectionModal: React.FC<ProviderConnectionModalProps> = ({
                 <Button 
                   type="submit"
                   disabled={connectMutation.isPending}
+                  className={`${
+                    provider.type === 'gcp' ? 'bg-blue-600 hover:bg-blue-700' : 
+                    provider.type === 'aws' ? 'bg-orange-600 hover:bg-orange-700' : 
+                    provider.type === 'azure' ? 'bg-purple-600 hover:bg-purple-700' : 
+                    ''
+                  }`}
                 >
                   {connectMutation.isPending ? (
                     <>
@@ -435,7 +451,7 @@ const ProviderConnectionModal: React.FC<ProviderConnectionModalProps> = ({
                       Connecting...
                     </>
                   ) : (
-                    "Connect"
+                    <>Connect to {provider.name}</>
                   )}
                 </Button>
               </DialogFooter>

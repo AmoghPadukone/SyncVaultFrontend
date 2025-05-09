@@ -5,8 +5,9 @@ import ProviderToggle from "./ProviderToggle";
 import ProviderConnectionModal from "./ProviderConnectionModal";
 import { CloudProvider } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertTriangle, Cloud } from "lucide-react";
+import { AlertTriangle, Cloud, Database } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { FaGoogle, FaAws, FaMicrosoft } from "react-icons/fa";
 
 const ProviderList: React.FC = () => {
   const [connectingProvider, setConnectingProvider] = useState<CloudProvider | null>(null);
@@ -103,39 +104,55 @@ const ProviderList: React.FC = () => {
       )}
       
       <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-        <div 
-          className="p-3 w-full rounded-lg border border-dashed border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-        >
-          <div className="flex items-center mb-3">
-            <div className="flex-shrink-0 h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <Cloud className="h-5 w-5 text-primary" />
-            </div>
-            <div className="ml-3 text-left">
-              <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">Add New Cloud Provider</h4>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Connect to additional cloud storage services</p>
-            </div>
-          </div>
+        <h3 className="text-lg font-medium mb-4">Available Cloud Providers</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {providers.map(provider => {
+            // Skip if already connected
+            const isConnected = userProviders?.some(up => up.providerId === provider.id);
+            if (isConnected) return null;
+            
+            let bgColorClass = 'bg-gray-50 dark:bg-gray-800';
+            let iconColorClass = 'text-primary';
+            
+            if (provider.type === 'gcp') {
+              bgColorClass = 'bg-blue-50 dark:bg-blue-900/20';
+              iconColorClass = 'text-blue-600 dark:text-blue-400';
+            } else if (provider.type === 'aws') {
+              bgColorClass = 'bg-orange-50 dark:bg-orange-900/20';
+              iconColorClass = 'text-orange-600 dark:text-orange-400';
+            } else if (provider.type === 'azure') {
+              bgColorClass = 'bg-purple-50 dark:bg-purple-900/20';
+              iconColorClass = 'text-purple-600 dark:text-purple-400';
+            }
+            
+            return (
+              <button 
+                key={provider.id}
+                onClick={() => handleConnectProvider(provider)}
+                className={`p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${bgColorClass} flex flex-col items-center justify-center text-center`}
+              >
+                <div className={`flex-shrink-0 h-12 w-12 rounded-full ${bgColorClass} flex items-center justify-center mb-3 border border-gray-200 dark:border-gray-700`}>
+                  {provider.type === 'gcp' ? (
+                    <FaGoogle className={`h-6 w-6 ${iconColorClass}`} />
+                  ) : provider.type === 'aws' ? (
+                    <FaAws className={`h-6 w-6 ${iconColorClass}`} />
+                  ) : provider.type === 'azure' ? (
+                    <FaMicrosoft className={`h-6 w-6 ${iconColorClass}`} />
+                  ) : (
+                    <Cloud className={`h-6 w-6 ${iconColorClass}`} />
+                  )}
+                </div>
+                <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">{provider.name}</h4>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Click to connect</p>
+              </button>
+            );
+          })}
           
-          <div className="mt-3">
-            <select 
-              className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100"
-              onChange={(e) => {
-                const selectedProviderId = parseInt(e.target.value);
-                const selected = providers.find(p => p.id === selectedProviderId);
-                if (selected) {
-                  setConnectingProvider(selected);
-                }
-              }}
-              value=""
-            >
-              <option value="" disabled>Select a provider</option>
-              {providers.map(p => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          {providers.length > 0 && !providers.some(p => !userProviders?.some(up => up.providerId === p.id)) && (
+            <div className="col-span-full text-center p-4 text-gray-500 dark:text-gray-400">
+              All available cloud providers are connected
+            </div>
+          )}
         </div>
       </div>
       
