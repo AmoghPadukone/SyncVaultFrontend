@@ -55,11 +55,27 @@ export function setupAuth(app: Express) {
 
   passport.use(
     new LocalStrategy(async (username, password, done) => {
-      const user = await storage.getUserByUsername(username);
-      if (!user || !(await comparePasswords(password, user.password))) {
-        return done(null, false);
-      } else {
+      console.log(`Login attempt for user: ${username}`);
+      try {
+        const user = await storage.getUserByUsername(username);
+        if (!user) {
+          console.log(`User ${username} not found`);
+          return done(null, false);
+        }
+        
+        console.log(`Found user: ${user.username}, comparing passwords...`);
+        const passwordMatches = await comparePasswords(password, user.password);
+        
+        if (!passwordMatches) {
+          console.log('Password comparison failed');
+          return done(null, false);
+        }
+        
+        console.log('Login successful');
         return done(null, user);
+      } catch (error) {
+        console.error('Error in authentication:', error);
+        return done(error);
       }
     }),
   );
@@ -104,9 +120,31 @@ export function setupAuth(app: Express) {
     }
   });
 
-  app.post("/api/auth/login", passport.authenticate("local"), (req, res) => {
-    const { password, ...userWithoutPassword } = req.user as SelectUser;
-    res.status(200).json(userWithoutPassword);
+  app.post("/api/auth/login", (req, res, next) => {
+    console.log('Login request received:', req.body);
+    
+    passport.authenticate('local', (err, user, info) => {
+      if (err) {
+        console.error('Authentication error:', err);
+        return next(err);
+      }
+      
+      if (!user) {
+        console.log('Authentication failed - no user returned');
+        return res.status(401).json({ message: 'Invalid username or password' });
+      }
+      
+      req.login(user, (loginErr) => {
+        if (loginErr) {
+          console.error('Login error:', loginErr);
+          return next(loginErr);
+        }
+        
+        console.log('User logged in successfully');
+        const { password, ...userWithoutPassword } = user as SelectUser;
+        return res.status(200).json(userWithoutPassword);
+      });
+    })(req, res, next);
   });
 
   app.post("/api/auth/logout", (req, res, next) => {
