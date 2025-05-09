@@ -10,6 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const ProviderList: React.FC = () => {
   const [connectingProvider, setConnectingProvider] = useState<CloudProvider | null>(null);
+  const [showProviderSelector, setShowProviderSelector] = useState(false);
   
   // Get all available providers
   const { data: providers, isLoading: isLoadingProviders, error: providersError } = useQuery({
@@ -25,10 +26,15 @@ const ProviderList: React.FC = () => {
   
   const handleConnectProvider = (provider: CloudProvider) => {
     setConnectingProvider(provider);
+    setShowProviderSelector(false);
   };
   
   const handleCloseModal = () => {
     setConnectingProvider(null);
+  };
+  
+  const openProviderSelector = () => {
+    setShowProviderSelector(true);
   };
   
   if (isLoadingProviders || isLoadingUserProviders) {
@@ -97,18 +103,40 @@ const ProviderList: React.FC = () => {
       )}
       
       <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-        <button 
-          onClick={() => setConnectingProvider(providers[0])}
-          className="flex items-center p-3 w-full rounded-lg border border-dashed border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+        <div 
+          className="p-3 w-full rounded-lg border border-dashed border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
         >
-          <div className="flex-shrink-0 h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-            <Cloud className="h-5 w-5 text-primary" />
+          <div className="flex items-center mb-3">
+            <div className="flex-shrink-0 h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <Cloud className="h-5 w-5 text-primary" />
+            </div>
+            <div className="ml-3 text-left">
+              <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">Add New Cloud Provider</h4>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Connect to additional cloud storage services</p>
+            </div>
           </div>
-          <div className="ml-3 text-left">
-            <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">Add New Cloud Provider</h4>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Connect to additional cloud storage services</p>
+          
+          <div className="mt-3">
+            <select 
+              className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100"
+              onChange={(e) => {
+                const selectedProviderId = parseInt(e.target.value);
+                const selected = providers.find(p => p.id === selectedProviderId);
+                if (selected) {
+                  setConnectingProvider(selected);
+                }
+              }}
+              value=""
+            >
+              <option value="" disabled>Select a provider</option>
+              {providers.map(p => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
           </div>
-        </button>
+        </div>
       </div>
       
       {connectingProvider && (

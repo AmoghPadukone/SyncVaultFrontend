@@ -392,7 +392,7 @@ const ProviderConnectionModal: React.FC<ProviderConnectionModalProps> = ({
               </span>
             </DialogTitle>
             <p className="text-sm text-gray-500 mt-2">
-              Enter your credentials to connect SyncVault with {provider.name}. 
+              Enter your {provider.name} credentials to connect with SyncVault. 
               All credentials are securely stored and used only for accessing your files.
             </p>
           </DialogHeader>
@@ -400,8 +400,16 @@ const ProviderConnectionModal: React.FC<ProviderConnectionModalProps> = ({
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-md mb-4">
                 <p className="text-sm text-blue-800 dark:text-blue-300">
-                  <span className="font-medium">Provider Integration:</span> Connect your {provider.name} account 
-                  to sync, browse and manage files directly within SyncVault.
+                  <span className="font-medium">Provider Integration:</span>{' '}
+                  {provider.type === 'gcp' ? (
+                    <>Connect your Google Cloud Platform account to sync, browse and manage files directly within SyncVault.</>
+                  ) : provider.type === 'aws' ? (
+                    <>Connect your AWS S3 account to sync, browse and manage files directly within SyncVault.</>
+                  ) : provider.type === 'azure' ? (
+                    <>Connect your Azure Storage account to sync, browse and manage files directly within SyncVault.</>
+                  ) : (
+                    <>Connect your {provider.name} account to sync, browse and manage files directly within SyncVault.</>
+                  )}
                 </p>
               </div>
               <div className="space-y-4">
