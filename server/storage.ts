@@ -72,7 +72,7 @@ export interface IStorage {
   updateUser(id: number, userData: Partial<User>): Promise<User>;
   
   // Session store
-  sessionStore: session.SessionStore;
+  sessionStore: Store;
   
   // Cloud provider methods
   getSupportedProviders(): Promise<CloudProvider[]>;
@@ -110,7 +110,7 @@ export class MemStorage implements IStorage {
   private cloudProviders: Map<number, CloudProvider>;
   private userCloudProviders: Map<number, UserCloudProvider>;
   private sharedFiles: Map<number, SharedFile>;
-  sessionStore: session.SessionStore;
+  sessionStore: Store;
   
   currentUserId: number;
   currentFolderId: number;
