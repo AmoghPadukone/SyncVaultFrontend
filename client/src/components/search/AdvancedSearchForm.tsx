@@ -19,10 +19,11 @@ import { format } from "date-fns";
 interface AdvancedSearchFormProps {
   onSearch: (data: AdvancedSearchParams) => void;
   isLoading?: boolean;
+  initialValues?: AdvancedSearchParams;
 }
 
 const FILE_TYPE_OPTIONS = [
-  { label: "All Files", value: "" },
+  { label: "All Files", value: "all" }, // Changed from empty string to "all"
   { label: "Documents", value: "application/pdf" },
   { label: "Images", value: "image/" },
   { label: "Videos", value: "video/" },
@@ -34,10 +35,11 @@ const FILE_TYPE_OPTIONS = [
 const AdvancedSearchForm: React.FC<AdvancedSearchFormProps> = ({
   onSearch,
   isLoading = false,
+  initialValues,
 }) => {
   const form = useForm<AdvancedSearchParams>({
     resolver: zodResolver(AdvancedSearchSchema),
-    defaultValues: {
+    defaultValues: initialValues || {
       fileName: "",
       mimeType: "",
       tag: "",

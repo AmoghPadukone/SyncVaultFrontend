@@ -91,109 +91,22 @@ const SearchResults: React.FC = () => {
               </div>
               
               <div className="mt-3 sm:mt-0 flex items-center space-x-2">
-                <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
-                  <SheetTrigger asChild>
+                <AdvancedSearchModal
+                  open={advancedSearchOpen}
+                  onOpenChange={setAdvancedSearchOpen}
+                  initialValues={advancedSearchParams}
+                  onSearch={(values) => {
+                    setAdvancedSearchParams(values);
+                    setSearchMode("advanced");
+                    refetch();
+                  }}
+                  trigger={
                     <Button variant="outline" className="flex items-center">
                       <Filter className="h-4 w-4 mr-2" />
-                      Filters
+                      Advanced Filters
                     </Button>
-                  </SheetTrigger>
-                  <SheetContent className="w-[300px] sm:w-[400px]">
-                    <SheetHeader>
-                      <SheetTitle>Search Filters</SheetTitle>
-                    </SheetHeader>
-                    
-                    <div className="py-4 space-y-6">
-                      <div className="space-y-2">
-                        <h3 className="text-sm font-medium">File Types</h3>
-                        <div className="space-y-2">
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="type-docs" />
-                            <Label htmlFor="type-docs">Documents</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="type-images" />
-                            <Label htmlFor="type-images">Images</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="type-videos" />
-                            <Label htmlFor="type-videos">Videos</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="type-audio" />
-                            <Label htmlFor="type-audio">Audio</Label>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <Separator />
-                      
-                      <div className="space-y-2">
-                        <h3 className="text-sm font-medium">Date Modified</h3>
-                        <div className="space-y-2">
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="date-today" />
-                            <Label htmlFor="date-today">Today</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="date-week" />
-                            <Label htmlFor="date-week">This week</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="date-month" />
-                            <Label htmlFor="date-month">This month</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="date-year" />
-                            <Label htmlFor="date-year">This year</Label>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <Separator />
-                      
-                      <div className="space-y-2">
-                        <h3 className="text-sm font-medium">File Size</h3>
-                        <div className="pt-4">
-                          <Slider defaultValue={[0, 100]} max={100} step={1} />
-                          <div className="flex justify-between mt-2 text-xs text-gray-500">
-                            <span>0 KB</span>
-                            <span>100+ MB</span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <Separator />
-                      
-                      <div className="space-y-2">
-                        <h3 className="text-sm font-medium">Cloud Provider</h3>
-                        <div className="space-y-2">
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="provider-google" />
-                            <Label htmlFor="provider-google">Google Drive</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="provider-dropbox" />
-                            <Label htmlFor="provider-dropbox">Dropbox</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="provider-onedrive" />
-                            <Label htmlFor="provider-onedrive">OneDrive</Label>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="pt-4 flex justify-end space-x-2">
-                        <Button variant="outline" size="sm">
-                          Reset
-                        </Button>
-                        <Button size="sm" onClick={() => setFiltersOpen(false)}>
-                          Apply Filters
-                        </Button>
-                      </div>
-                    </div>
-                  </SheetContent>
-                </Sheet>
+                  }
+                />
               
                 <div className="flex items-center">
                   <Button
