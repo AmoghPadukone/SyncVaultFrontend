@@ -74,15 +74,23 @@ const Dashboard: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">Storage Used</CardTitle>
+                  <CardTitle className="text-sm font-medium">Storage Usage</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between">
-                    <div className="text-2xl font-bold">68%</div>
+                    <div className="text-2xl font-bold">68 GB</div>
                     <BarChart3 className="h-4 w-4 text-gray-400" />
                   </div>
-                  <Progress value={68} className="h-2 mt-2" />
-                  <p className="text-xs text-gray-500 mt-2">68GB of 100GB used</p>
+                  <div className="space-y-2 mt-4">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-500">Account Limit:</span>
+                      <span className="font-medium">100 GB</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-500">Account ID:</span>
+                      <span className="font-medium">SV-91782</span>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
               

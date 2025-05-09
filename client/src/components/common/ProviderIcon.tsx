@@ -1,9 +1,9 @@
 import React from "react";
 import { FolderOpen, CloudOff, Server } from "lucide-react";
 import { 
-  Cloud as CloudIcon, 
-  CloudApp as CloudAppIcon,
-  CloudServiceManagement as CloudServiceIcon,
+  Cloud, 
+  CloudApp,
+  CloudAlerting,
 } from "@carbon/icons-react";
 
 interface ProviderIconProps {
@@ -16,11 +16,11 @@ const ProviderIcon: React.FC<ProviderIconProps> = ({ provider, className = "", s
   const getProviderIcon = () => {
     switch (provider.toLowerCase()) {
       case "google-drive":
-        return <Cloud className={`text-green-500 ${className}`} width={size} height={size} />;
+        return <Cloud className={`text-green-500 ${className}`} size={size} />;
       case "dropbox":
-        return <CloudApp className={`text-amber-600 ${className}`} width={size} height={size} />;
+        return <CloudApp className={`text-amber-600 ${className}`} size={size} />;
       case "onedrive":
-        return <CloudServiceManagement className={`text-blue-600 ${className}`} width={size} height={size} />;
+        return <CloudAlerting className={`text-blue-600 ${className}`} size={size} />;
       case "none":
         return <CloudOff className={`text-gray-400 ${className}`} size={size} />;
       default:
