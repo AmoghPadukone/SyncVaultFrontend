@@ -1,7 +1,9 @@
 import React, { useEffect, useRef } from "react";
 import { Folder, File } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Download, ExternalLink, Info, Pencil, Share2, Trash2, UploadCloud } from "lucide-react";
+import { Copy, Download, ExternalLink, Info, Pencil, Share2, Trash2, UploadCloud, Star } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { filesApi } from "@/api/files";
 
 interface ContextMenuProps {
   x: number;
@@ -22,6 +24,32 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  // Toggle favorite mutation
+  const toggleFavoriteMutation = useMutation({
+    mutationFn: (fileId: number) => filesApi.toggleFavorite(fileId),
+    onSuccess: (updatedFile) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/files", (item as File).id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/folders/contents"] });
+      
+      toast({
+        title: updatedFile.isFavorite ? "Added to favorites" : "Removed from favorites",
+        description: updatedFile.isFavorite 
+          ? `${item.name} was added to your favorites` 
+          : `${item.name} was removed from your favorites`,
+      });
+      
+      onClose();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update favorite status",
+        variant: "destructive",
+      });
+    },
+  });
   
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -55,6 +83,12 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
   };
   
   const position = adjustedPosition();
+  
+  const handleToggleFavorite = () => {
+    if (itemType === "file") {
+      toggleFavoriteMutation.mutate((item as File).id);
+    }
+  };
   
   const handleActionClick = (action: string) => {
     // Placeholder for actions - to be implemented
@@ -108,13 +142,25 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
         </button>
         
         {itemType === "file" && (
-          <button
-            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-            onClick={() => handleActionClick("Share")}
-          >
-            <Share2 className="w-4 h-4 mr-2" />
-            Share
-          </button>
+          <>
+            <button
+              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              onClick={() => handleActionClick("Share")}
+            >
+              <Share2 className="w-4 h-4 mr-2" />
+              Share
+            </button>
+            
+            <button
+              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              onClick={handleToggleFavorite}
+            >
+              <Star 
+                className={`w-4 h-4 mr-2 ${(item as File).isFavorite ? 'text-yellow-500 fill-yellow-500' : ''}`} 
+              />
+              {(item as File).isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+            </button>
+          </>
         )}
         
         <div className="border-t border-gray-200 dark:border-gray-700 my-1"></div>

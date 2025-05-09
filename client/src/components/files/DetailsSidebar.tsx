@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { File, Folder } from "@shared/schema";
-import { X, FileText, Folder as FolderIcon, Clock, User, Calendar, HardDrive, Share2, Download, Link, Copy, Loader2 } from "lucide-react";
+import { X, FileText, Folder as FolderIcon, Clock, User, Calendar, HardDrive, Share2, Download, Link, Copy, Loader2, Tag } from "lucide-react";
 import { getFileTypeIcon, getReadableFileSize } from "@/utils/file-utils";
 import { format } from "date-fns";
 import ProviderIcon from "@/components/common/ProviderIcon";
@@ -12,6 +12,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useMutation } from "@tanstack/react-query";
+import FavoriteToggle from "./FavoriteToggle";
+import FileTagInput from "./FileTagInput";
+import { Separator } from "@/components/ui/separator";
 
 interface DetailsSidebarProps {
   item: File | Folder;
@@ -133,8 +136,11 @@ const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
         <div className="w-16 h-16 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg">
           {getFileTypeIcon(file.mimeType, "w-10 h-10")}
         </div>
-        <div className="ml-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{file.name}</h3>
+        <div className="ml-4 flex-grow">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 pr-2">{file.name}</h3>
+            <FavoriteToggle file={file} size="sm" />
+          </div>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             {file.mimeType || "Unknown type"}
           </p>
@@ -175,6 +181,11 @@ const DetailsSidebar: React.FC<DetailsSidebarProps> = ({
           label="Sharing" 
           value="Not shared" 
         />
+        
+        <Separator className="my-4" />
+        
+        {/* Tags section */}
+        <FileTagInput file={file} />
       </div>
     </>
   );
