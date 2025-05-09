@@ -142,9 +142,9 @@ export class MemStorage implements IStorage {
 
   private seedCloudProviders() {
     const providers = [
-      { name: "Google Cloud Platform", type: "google-drive", icon: "google-drive", isActive: true },
-      { name: "Amazon Web Services", type: "dropbox", icon: "dropbox", isActive: true },
-      { name: "Microsoft Azure", type: "onedrive", icon: "onedrive", isActive: true }
+      { name: "Google Cloud Platform", type: "gcp", icon: "gcp", isActive: true },
+      { name: "Amazon Web Services", type: "aws", icon: "aws", isActive: true },
+      { name: "Microsoft Azure", type: "azure", icon: "azure", isActive: true }
     ];
     
     for (const provider of providers) {

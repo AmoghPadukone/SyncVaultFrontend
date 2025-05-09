@@ -172,12 +172,23 @@ const LiveCloud: React.FC = () => {
                       <div className="space-y-4">
                         <div>
                           <p className="text-sm text-gray-500 dark:text-gray-400">Storage Usage</p>
-                          <Progress value={68} className="h-2 mt-1" />
-                          <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">68GB of 100GB used</p>
+                          <div className="flex items-center justify-between mt-1">
+                            <p className="text-lg font-bold">68 GB</p>
+                            <p className="text-xs text-gray-500">of 100 GB</p>
+                          </div>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">Account</p>
-                          <p className="text-sm font-medium dark:text-gray-300">user@example.com</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Account Information</p>
+                          <div className="space-y-1 mt-1">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-gray-500">Account ID:</span>
+                              <span className="font-medium">SV-{connection.id}X9124</span>
+                            </div>
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-gray-500">Account Tier:</span>
+                              <span className="font-medium">Enterprise</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </CardContent>

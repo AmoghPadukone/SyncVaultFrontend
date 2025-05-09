@@ -16,10 +16,13 @@ const ProviderIcon: React.FC<ProviderIconProps> = ({ provider, className = "", s
   const getProviderIcon = () => {
     switch (provider.toLowerCase()) {
       case "google-drive":
+      case "gcp":
         return <Cloud className={`text-green-500 ${className}`} size={size} />;
       case "dropbox":
+      case "aws":
         return <CloudApp className={`text-amber-600 ${className}`} size={size} />;
       case "onedrive":
+      case "azure":
         return <CloudAlerting className={`text-blue-600 ${className}`} size={size} />;
       case "none":
         return <CloudOff className={`text-gray-400 ${className}`} size={size} />;
