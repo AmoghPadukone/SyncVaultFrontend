@@ -18,14 +18,18 @@ import { ProtectedRoute } from "./lib/protected-route";
 function Router() {
   return (
     <Switch>
-      <Route path="/auth" component={AuthPage} />
-      <Route path="/" component={Dashboard} />
-      <Route path="/my-drive" component={MyDrive} />
-      <Route path="/shared" component={Shared} />
-      <Route path="/cloud" component={LiveCloud} />
-      <Route path="/search" component={SearchResults} />
-      <Route path="/settings" component={Settings} />
-      <Route component={NotFound} />
+      <Route path="/auth">
+        <AuthPage />
+      </Route>
+      <ProtectedRoute path="/" component={Dashboard} />
+      <ProtectedRoute path="/my-drive" component={MyDrive} />
+      <ProtectedRoute path="/shared" component={Shared} />
+      <ProtectedRoute path="/cloud" component={LiveCloud} />
+      <ProtectedRoute path="/search" component={SearchResults} />
+      <ProtectedRoute path="/settings" component={Settings} />
+      <Route>
+        <NotFound />
+      </Route>
     </Switch>
   );
 }

@@ -18,6 +18,7 @@ import {
   type SharedFile,
   type InsertSharedFile
 } from "@shared/schema";
+import crypto from "crypto";
 import session from "express-session";
 import createMemoryStore from "memorystore";
 import { randomBytes } from "crypto";
@@ -138,6 +139,239 @@ export class MemStorage implements IStorage {
     
     // Initialize with some default cloud providers
     this.seedCloudProviders();
+    
+    // Add demo user with sample data for demonstration
+    this.createDemoAccount();
+  }
+  
+  private createDemoAccount() {
+    // Create demo user with all the necessary data synchronously
+    const userId = this.currentUserId++;
+    const now = new Date();
+    const user = { 
+      username: "demo",
+      password: "password123",
+      email: "demo@syncvault.io",
+      fullName: "Demo User",
+      id: userId,
+      createdAt: now
+    };
+    this.users.set(userId, user);
+    
+    // Create a root folder for the user
+    const rootFolderId = this.currentFolderId++;
+    const rootFolder = {
+      name: "My Drive",
+      userId: userId,
+      isRoot: true,
+      path: "/",
+      id: rootFolderId,
+      createdAt: now,
+      updatedAt: now,
+      parentId: null,
+      providerId: null,
+      externalId: null
+    };
+    this.folders.set(rootFolderId, rootFolder);
+    
+    // Connect user to all cloud providers
+    const providers = Array.from(this.cloudProviders.values());
+    for (const provider of providers) {
+      const id = this.currentUserProviderId++;
+      const expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days from now
+      
+      const userProvider = {
+        id,
+        userId,
+        providerId: provider.id,
+        accessToken: "demo-access-token",
+        refreshToken: "demo-refresh-token",
+        expiresAt,
+        metadata: {
+          storageUsed: 68 * 1024 * 1024 * 1024, // 68 GB
+          storageTotal: 100 * 1024 * 1024 * 1024, // 100 GB
+          accountTier: "Enterprise",
+          accountId: `SV-${provider.id}X9124`
+        }
+      };
+      
+      this.userCloudProviders.set(id, userProvider);
+    }
+    
+    // Create sample folders directly (without using createFolder to avoid async issues)
+    const documentsId = this.currentFolderId++;
+    const documentsFolder = {
+      id: documentsId,
+      name: "Documents",
+      path: "/Documents",
+      userId,
+      parentId: null,
+      isRoot: false,
+      createdAt: now,
+      updatedAt: now,
+      providerId: null,
+      externalId: null
+    };
+    this.folders.set(documentsId, documentsFolder);
+    
+    const photosId = this.currentFolderId++;
+    const photosFolder = {
+      id: photosId,
+      name: "Photos",
+      path: "/Photos",
+      userId,
+      parentId: null,
+      isRoot: false,
+      createdAt: now,
+      updatedAt: now,
+      providerId: null,
+      externalId: null
+    };
+    this.folders.set(photosId, photosFolder);
+    
+    const workId = this.currentFolderId++;
+    const workFolder = {
+      id: workId,
+      name: "Work Projects",
+      path: "/Work Projects",
+      userId,
+      parentId: null,
+      isRoot: false,
+      createdAt: now,
+      updatedAt: now,
+      providerId: null,
+      externalId: null
+    };
+    this.folders.set(workId, workFolder);
+    
+    const reportsId = this.currentFolderId++;
+    const reportsFolder = {
+      id: reportsId,
+      name: "Reports",
+      path: "/Work Projects/Reports",
+      userId,
+      parentId: workId,
+      isRoot: false,
+      createdAt: now,
+      updatedAt: now,
+      providerId: null,
+      externalId: null
+    };
+    this.folders.set(reportsId, reportsFolder);
+    
+    // Create sample files
+    const docFiles = [
+      { name: "Project Proposal.docx", size: 2.4 * 1024 * 1024, mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" },
+      { name: "Meeting Notes.txt", size: 24 * 1024, mimeType: "text/plain" },
+      { name: "Budget 2025.xlsx", size: 1.8 * 1024 * 1024, mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }
+    ];
+    
+    const photoFiles = [
+      { name: "Team Photo.jpg", size: 3.2 * 1024 * 1024, mimeType: "image/jpeg" },
+      { name: "Product Launch.png", size: 4.5 * 1024 * 1024, mimeType: "image/png" },
+      { name: "Office Setup.jpg", size: 2.8 * 1024 * 1024, mimeType: "image/jpeg" }
+    ];
+    
+    const reportFiles = [
+      { name: "Q1 Analysis.pdf", size: 8.7 * 1024 * 1024, mimeType: "application/pdf" },
+      { name: "Market Research.pdf", size: 12.4 * 1024 * 1024, mimeType: "application/pdf" },
+      { name: "Project Timeline.pdf", size: 5.2 * 1024 * 1024, mimeType: "application/pdf" }
+    ];
+    
+    // Add files directly to avoid async issues
+    // Add the doc files to Documents folder
+    for (const file of docFiles) {
+      const fileId = this.currentFileId++;
+      const fileObj = {
+        id: fileId,
+        name: file.name,
+        userId,
+        folderId: documentsId,
+        size: file.size,
+        mimeType: file.mimeType,
+        providerId: providers[0].id, // GCP
+        path: `/Documents/${file.name}`,
+        createdAt: now,
+        updatedAt: now,
+        externalId: null,
+        thumbnailUrl: null
+      };
+      this.files.set(fileId, fileObj);
+    }
+    
+    // Add photo files to Photos folder
+    for (const file of photoFiles) {
+      const fileId = this.currentFileId++;
+      const fileObj = {
+        id: fileId,
+        name: file.name,
+        userId,
+        folderId: photosId,
+        size: file.size,
+        mimeType: file.mimeType,
+        providerId: providers[1].id, // AWS
+        path: `/Photos/${file.name}`,
+        createdAt: now,
+        updatedAt: now,
+        externalId: null,
+        thumbnailUrl: null
+      };
+      this.files.set(fileId, fileObj);
+    }
+    
+    // Add report files to Reports subfolder
+    for (const file of reportFiles) {
+      const fileId = this.currentFileId++;
+      const fileObj = {
+        id: fileId,
+        name: file.name,
+        userId,
+        folderId: reportsId,
+        size: file.size,
+        mimeType: file.mimeType,
+        providerId: providers[2].id, // Azure
+        path: `/Work Projects/Reports/${file.name}`,
+        createdAt: now,
+        updatedAt: now,
+        externalId: null,
+        thumbnailUrl: null
+      };
+      this.files.set(fileId, fileObj);
+    }
+    
+    // Create shared file
+    const sharedFileId = this.currentFileId++;
+    const sharedFile = {
+      id: sharedFileId,
+      name: "Company Overview.pdf",
+      userId,
+      folderId: workId,
+      size: 15.6 * 1024 * 1024,
+      mimeType: "application/pdf",
+      providerId: providers[0].id,
+      path: `/Work Projects/Company Overview.pdf`,
+      createdAt: now,
+      updatedAt: now,
+      externalId: null,
+      thumbnailUrl: null
+    };
+    this.files.set(sharedFileId, sharedFile);
+    
+    // Generate share link directly
+    const shareId = this.currentSharedFileId++;
+    const shareToken = crypto.randomBytes(16).toString('hex');
+    const expires = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days
+    
+    const shareData = {
+      id: shareId,
+      fileId: sharedFileId,
+      userId,
+      token: shareToken,
+      expiresAt: expires,
+      createdAt: now
+    };
+    
+    this.sharedFiles.set(shareId, shareData);
   }
 
   private seedCloudProviders() {

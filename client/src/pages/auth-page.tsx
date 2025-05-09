@@ -47,7 +47,12 @@ const AuthPage: React.FC = () => {
   const { user, loginMutation, registerMutation } = useAuth();
   const [_, setLocation] = useLocation();
 
-  // Commenting out redirect to allow viewing the auth page
+  // Redirect to home if user is already logged in
+  useEffect(() => {
+    if (user) {
+      setLocation("/");
+    }
+  }, [user, setLocation]);
   // if (user) {
   //   return <Redirect to="/" />;
   // }
