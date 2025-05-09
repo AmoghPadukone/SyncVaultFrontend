@@ -3,9 +3,11 @@ import { File } from "@shared/schema";
 import { getFileTypeIcon, getReadableFileSize } from "@/utils/file-utils";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { Star } from "lucide-react";
 import ContextMenu from "./ContextMenu";
 import DetailsSidebar from "./DetailsSidebar";
 import ProviderIcon from "@/components/common/ProviderIcon";
+import FavoriteToggle from "./FavoriteToggle";
 
 interface FileCardProps {
   file: File;
@@ -67,12 +69,20 @@ const FileCard: React.FC<FileCardProps> = ({
               {getFileTypeIcon(file.mimeType, "h-6 w-6")}
             </div>
             <div className="ml-4 flex-grow min-w-0">
-              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{file.name}</p>
+              <div className="flex items-center">
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{file.name}</p>
+                {file.isFavorite && (
+                  <Star className="h-3 w-3 ml-2 text-yellow-500 fill-yellow-500 flex-shrink-0" />
+                )}
+              </div>
               <p className="text-xs text-gray-500 dark:text-gray-400">{formattedSize}</p>
             </div>
           </div>
           <div className="hidden sm:block flex-shrink-0 w-32 text-right">
             <p className="text-xs text-gray-500 dark:text-gray-400">{formattedDate}</p>
+          </div>
+          <div className="hidden md:flex flex-shrink-0 w-10 items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <FavoriteToggle file={file} size="sm" />
           </div>
           {file.providerId && (
             <div className="hidden md:flex flex-shrink-0 w-10 items-center justify-center">
@@ -124,11 +134,21 @@ const FileCard: React.FC<FileCardProps> = ({
           <p className="text-xs text-gray-500 dark:text-gray-400 text-center">{formattedSize}</p>
         </div>
         
+        <div className="absolute top-2 left-2">
+          {file.isFavorite && (
+            <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+          )}
+        </div>
+        
         {file.providerId && (
           <div className="absolute top-2 right-2">
             <ProviderIcon providerId={file.providerId} size="small" />
           </div>
         )}
+        
+        <div className={`absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity`}>
+          <FavoriteToggle file={file} size="sm" />
+        </div>
       </div>
       
       {contextMenu && (

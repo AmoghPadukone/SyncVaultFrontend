@@ -8,6 +8,7 @@ import {
   PlusIcon,
   HardDrive,
   Globe,
+  Star,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useQuery } from "@tanstack/react-query";
@@ -52,6 +53,13 @@ const Sidebar: React.FC = () => {
             <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${location === "/my-drive" || location === "/" ? "bg-primary text-white" : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"}`}>
               <FolderIcon className="h-5 w-5 mr-3" />
               My Drive
+            </a>
+          </Link>
+          
+          <Link href="/favorites">
+            <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${location === "/favorites" ? "bg-primary text-white" : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"}`}>
+              <Star className="h-5 w-5 mr-3 text-yellow-500" />
+              Favorites
             </a>
           </Link>
           
