@@ -22,6 +22,7 @@ import crypto from "crypto";
 import session from "express-session";
 import createMemoryStore from "memorystore";
 import { randomBytes } from "crypto";
+import type { Store } from "express-session";
 
 const MemoryStore = createMemoryStore(session);
 
@@ -148,9 +149,13 @@ export class MemStorage implements IStorage {
     // Create demo user with all the necessary data synchronously
     const userId = this.currentUserId++;
     const now = new Date();
+    
+    // Pre-computed hash for "password123" using the same hashing function as in auth.ts
+    const hashedPassword = "1b54c15de5bc198e2b3e6f73edb1d4699b8b208edcf45e7f90c79a69bf25e836b93fb2bc23ad27fb0e7bc464d1323b54e16061125e355b0ec3a566dbcc9e982c.b67b5ebc21e32e81dccb5c27dec5d9a1";
+    
     const user = { 
       username: "demo",
-      password: "password123",
+      password: hashedPassword,
       email: "demo@syncvault.io",
       fullName: "Demo User",
       id: userId,
