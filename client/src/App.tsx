@@ -23,8 +23,10 @@ function Router() {
       </Route>
       <ProtectedRoute path="/" component={Dashboard} />
       <ProtectedRoute path="/my-drive" component={MyDrive} />
+      <ProtectedRoute path="/drive/folder/:folderId" component={MyDrive} />
       <ProtectedRoute path="/shared" component={Shared} />
       <ProtectedRoute path="/cloud" component={LiveCloud} />
+      <ProtectedRoute path="/live-cloud" component={LiveCloud} />
       <ProtectedRoute path="/search" component={SearchResults} />
       <ProtectedRoute path="/settings" component={Settings} />
       <Route>

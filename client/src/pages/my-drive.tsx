@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "@/components/layout/Sidebar";
 import TopBar from "@/components/layout/TopBar";
 import MobileNavbar from "@/components/layout/MobileNavbar";
@@ -11,7 +11,7 @@ import { Folder, File } from "@shared/schema";
 import FolderCard from "@/components/files/FolderCard";
 import FileCard from "@/components/files/FileCard";
 import FileUploadZone from "@/components/files/FileUploadZone";
-import { FolderPlus, Upload, LayoutGrid, List } from "lucide-react";
+import { FolderPlus, Upload, LayoutGrid, List, ChevronLeft } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { z } from "zod";
@@ -20,6 +20,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useRoute, useLocation } from "wouter";
 
 // Schema for creating a new folder
 const newFolderSchema = z.object({
