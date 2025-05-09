@@ -12,17 +12,25 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import FileCard from "@/components/files/FileCard";
 import ModeToggle from "@/components/search/ModeToggle";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Slider } from "@/components/ui/slider";
+import AdvancedSearchModal from "@/components/search/AdvancedSearchModal";
+import { AdvancedSearchParams } from "@/lib/schemas/search-schema";
 
 const SearchResults: React.FC = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchMode, setSearchMode] = useRecoilState(searchModeAtom);
   const [searchQuery, setSearchQuery] = useRecoilState(searchQueryAtom);
-  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false);
+  const [advancedSearchParams, setAdvancedSearchParams] = useState<AdvancedSearchParams>({
+    fileName: "",
+    mimeType: "",
+    tag: "",
+    isFavorite: false,
+    sizeMin: 0,
+    sizeMax: undefined,
+    sharedOnly: false,
+    createdBefore: undefined,
+    createdAfter: undefined,
+  });
   
   // Get search query from URL
   useEffect(() => {
@@ -40,14 +48,19 @@ const SearchResults: React.FC = () => {
   }, []);
 
   // Fetch search results based on mode
-  const { data: searchResults = [], isLoading } = useQuery({
-    queryKey: ["/api/search", searchMode, searchQuery],
+  const { data: searchResults = [], isLoading, refetch } = useQuery({
+    queryKey: ["/api/search", searchMode, searchQuery, advancedSearchParams],
     queryFn: () => {
-      if (!searchQuery) return Promise.resolve([]);
+      if (!searchQuery && searchMode !== "advanced") return Promise.resolve([]);
 
       switch (searchMode) {
         case "advanced":
-          return searchApi.advancedSearch({ name: searchQuery });
+          // Use the full advancedSearchParams object
+          return searchApi.advancedSearch({
+            ...advancedSearchParams,
+            // If there's a searchQuery, use it as fileName
+            ...(searchQuery ? { fileName: searchQuery } : {})
+          });
         case "smart":
           return searchApi.smartSearch(searchQuery).then(data => data.results);
         case "raw":
@@ -55,7 +68,7 @@ const SearchResults: React.FC = () => {
           return searchApi.rawSearch(searchQuery);
       }
     },
-    enabled: searchQuery.length > 0
+    enabled: searchQuery.length > 0 || (searchMode === "advanced" && Object.values(advancedSearchParams).some(val => val !== undefined && val !== "" && val !== false && val !== 0))
   });
 
   return (
