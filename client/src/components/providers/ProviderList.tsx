@@ -70,20 +70,31 @@ const ProviderList: React.FC = () => {
         <h3 className="text-lg font-medium">Connected Providers</h3>
       </div>
       
-      {providers.map((provider) => {
-        const userProvider = userProviders?.find(
-          (up) => up.providerId === provider.id
-        );
-        
-        return (
-          <ProviderToggle
-            key={provider.id}
-            provider={provider}
-            userProvider={userProvider}
-            onConnect={() => handleConnectProvider(provider)}
-          />
-        );
-      })}
+      {/* Show only connected providers in the list */}
+      {userProviders && userProviders.length > 0 ? (
+        <>
+          {userProviders.map((userProvider) => {
+            // Find the provider details
+            const provider = providers.find(p => p.id === userProvider.providerId);
+            if (!provider) return null;
+            
+            return (
+              <ProviderToggle
+                key={provider.id}
+                provider={provider}
+                userProvider={userProvider}
+                onConnect={() => handleConnectProvider(provider)}
+              />
+            );
+          })}
+        </>
+      ) : (
+        <div className="p-4 text-center bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <p className="text-gray-500 dark:text-gray-400">
+            No cloud providers connected. Add a provider to get started.
+          </p>
+        </div>
+      )}
       
       <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
         <button 

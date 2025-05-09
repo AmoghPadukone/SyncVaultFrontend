@@ -1,7 +1,8 @@
 import { apiRequest } from "@/lib/queryClient";
 import { File } from "@shared/schema";
+import { AdvancedSearchParams } from "@/lib/schemas/search-schema";
 
-export interface AdvancedSearchFilters {
+export interface LegacyAdvancedSearchFilters {
   name?: string;
   type?: string;
   size?: {
@@ -17,7 +18,7 @@ export interface AdvancedSearchFilters {
 
 export interface SmartSearchResult {
   parsedQuery: {
-    filters: AdvancedSearchFilters;
+    filters: LegacyAdvancedSearchFilters;
     originalPrompt: string;
   };
   results: File[];
@@ -29,7 +30,7 @@ export const searchApi = {
     return await res.json();
   },
 
-  advancedSearch: async (filters: AdvancedSearchFilters): Promise<File[]> => {
+  advancedSearch: async (filters: AdvancedSearchParams): Promise<File[]> => {
     const res = await apiRequest("POST", "/api/search/advanced", { filters });
     return await res.json();
   },

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Switch } from "@/components/ui/switch";
 import { CloudProvider, UserCloudProvider } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
@@ -6,6 +6,7 @@ import { useMutation } from "@tanstack/react-query";
 import { providersApi } from "@/api/providers";
 import { queryClient } from "@/lib/queryClient";
 import ProviderIcon from "@/components/common/ProviderIcon";
+import ProviderWelcomeAnimation from "./ProviderWelcomeAnimation";
 
 interface ProviderToggleProps {
   provider: CloudProvider;
@@ -21,6 +22,7 @@ const ProviderToggle: React.FC<ProviderToggleProps> = ({
   const { toast } = useToast();
   const isConnected = !!userProvider;
   const isActive = userProvider?.isActive || false;
+  const [showDisconnectAnimation, setShowDisconnectAnimation] = useState(false);
 
   const toggleActiveMutation = useMutation({
     mutationFn: () => {
@@ -49,11 +51,15 @@ const ProviderToggle: React.FC<ProviderToggleProps> = ({
       return providersApi.disconnectProvider(provider.id);
     },
     onSuccess: () => {
+      // Show the disconnection animation
+      setShowDisconnectAnimation(true);
+      
       toast({
         title: "Provider disconnected",
         description: `${provider.name} has been disconnected successfully`,
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/providers/user"] });
+      
+      // Query invalidation happens after animation completes
     },
     onError: (error) => {
       toast({
@@ -63,6 +69,14 @@ const ProviderToggle: React.FC<ProviderToggleProps> = ({
       });
     },
   });
+  
+  const handleAnimationComplete = () => {
+    // Reset animation state
+    setShowDisconnectAnimation(false);
+    
+    // Refresh the provider data
+    queryClient.invalidateQueries({ queryKey: ["/api/providers/user"] });
+  };
 
   const handleToggleActive = () => {
     if (!isConnected) {
@@ -77,43 +91,53 @@ const ProviderToggle: React.FC<ProviderToggleProps> = ({
   };
 
   return (
-    <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-      <div className="flex items-center space-x-3">
-        <ProviderIcon providerId={provider.id} size="medium" />
-        <div>
-          <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">{provider.name}</h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            {isConnected
-              ? isActive
-                ? "Active"
-                : "Connected (inactive)"
-              : "Not connected"}
-          </p>
+    <>
+      {showDisconnectAnimation ? (
+        <ProviderWelcomeAnimation
+          provider={provider}
+          isConnected={false}
+          onAnimationComplete={handleAnimationComplete}
+        />
+      ) : (
+        <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+          <div className="flex items-center space-x-3">
+            <ProviderIcon providerId={provider.id} size="medium" />
+            <div>
+              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">{provider.name}</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {isConnected
+                  ? isActive
+                    ? "Active"
+                    : "Connected (inactive)"
+                  : "Not connected"}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-4">
+            {isConnected && (
+              <button
+                onClick={() => disconnectMutation.mutate()}
+                disabled={disconnectMutation.isPending}
+                className="text-xs text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                title="Disconnect provider"
+              >
+                {disconnectMutation.isPending ? 'Disconnecting...' : 'Disconnect'}
+              </button>
+            )}
+            <div className="flex items-center space-x-2">
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                {isConnected ? 'Use' : 'Connect'}
+              </span>
+              <Switch 
+                checked={isActive} 
+                onCheckedChange={handleToggleActive}
+                disabled={toggleActiveMutation.isPending || disconnectMutation.isPending}
+              />
+            </div>
+          </div>
         </div>
-      </div>
-      <div className="flex items-center space-x-4">
-        {isConnected && (
-          <button
-            onClick={() => disconnectMutation.mutate()}
-            disabled={disconnectMutation.isPending}
-            className="text-xs text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors"
-            title="Disconnect provider"
-          >
-            {disconnectMutation.isPending ? 'Disconnecting...' : 'Disconnect'}
-          </button>
-        )}
-        <div className="flex items-center space-x-2">
-          <span className="text-xs text-gray-500 dark:text-gray-400">
-            {isConnected ? 'Use' : 'Connect'}
-          </span>
-          <Switch 
-            checked={isActive} 
-            onCheckedChange={handleToggleActive}
-            disabled={toggleActiveMutation.isPending || disconnectMutation.isPending}
-          />
-        </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 };
 

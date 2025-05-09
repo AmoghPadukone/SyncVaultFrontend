@@ -1,8 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { CloudProvider } from "@shared/schema";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -14,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { Loader2 } from "lucide-react";
 import ProviderIcon from "@/components/common/ProviderIcon";
+import ProviderWelcomeAnimation from "./ProviderWelcomeAnimation";
 
 interface ProviderConnectionModalProps {
   provider: CloudProvider;
@@ -85,6 +85,7 @@ const ProviderConnectionModal: React.FC<ProviderConnectionModalProps> = ({
   const { toast } = useToast();
   const schema = getProviderSchema(provider.type);
   type FormValues = z.infer<typeof schema>;
+  const [showWelcomeAnimation, setShowWelcomeAnimation] = useState(false);
   
   // Get initial values based on provider type
   const getInitialValues = (): FormValues => {
@@ -138,12 +139,17 @@ const ProviderConnectionModal: React.FC<ProviderConnectionModalProps> = ({
       return providersApi.connectProvider(provider.id, data);
     },
     onSuccess: () => {
+      // Set showWelcomeAnimation to true to trigger the animation
+      setShowWelcomeAnimation(true);
+      
+      // Still show a toast notification
       toast({
         title: "Provider connected",
         description: `${provider.name} has been connected successfully.`,
       });
+      
+      // Refresh the provider data
       queryClient.invalidateQueries({ queryKey: ["/api/providers/user"] });
-      onClose();
     },
     onError: (error) => {
       toast({
@@ -360,60 +366,76 @@ const ProviderConnectionModal: React.FC<ProviderConnectionModalProps> = ({
     }
   };
   
+  const handleAnimationComplete = () => {
+    // Close the provider connection modal and reset animation state
+    setShowWelcomeAnimation(false);
+    onClose();
+  };
+  
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center space-x-2">
-            <span className="flex items-center">
-              <ProviderIcon providerId={provider.id} size="small" />
-              <span className="ml-2">Connect to {provider.name}</span>
-            </span>
-          </DialogTitle>
-          <p className="text-sm text-gray-500 mt-2">
-            Enter your credentials to connect SyncVault with {provider.name}. 
-            All credentials are securely stored and used only for accessing your files.
-          </p>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-md mb-4">
-              <p className="text-sm text-blue-800 dark:text-blue-300">
-                <span className="font-medium">Provider Integration:</span> Connect your {provider.name} account 
-                to sync, browse and manage files directly within SyncVault.
-              </p>
-            </div>
-            <div className="space-y-4">
-              {renderProviderFields()}
-            </div>
-            
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                disabled={connectMutation.isPending}
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="submit"
-                disabled={connectMutation.isPending}
-              >
-                {connectMutation.isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Connecting...
-                  </>
-                ) : (
-                  "Connect"
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+    <>
+      {showWelcomeAnimation && (
+        <ProviderWelcomeAnimation
+          provider={provider}
+          isConnected={true}
+          onAnimationComplete={handleAnimationComplete}
+        />
+      )}
+      
+      <Dialog open={isOpen && !showWelcomeAnimation} onOpenChange={(open) => !open && onClose()}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <span className="flex items-center">
+                <ProviderIcon providerId={provider.id} size="small" />
+                <span className="ml-2">Connect to {provider.name}</span>
+              </span>
+            </DialogTitle>
+            <p className="text-sm text-gray-500 mt-2">
+              Enter your credentials to connect SyncVault with {provider.name}. 
+              All credentials are securely stored and used only for accessing your files.
+            </p>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-md mb-4">
+                <p className="text-sm text-blue-800 dark:text-blue-300">
+                  <span className="font-medium">Provider Integration:</span> Connect your {provider.name} account 
+                  to sync, browse and manage files directly within SyncVault.
+                </p>
+              </div>
+              <div className="space-y-4">
+                {renderProviderFields()}
+              </div>
+              
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  disabled={connectMutation.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit"
+                  disabled={connectMutation.isPending}
+                >
+                  {connectMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Connecting...
+                    </>
+                  ) : (
+                    "Connect"
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
