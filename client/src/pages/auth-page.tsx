@@ -14,7 +14,7 @@ import { Loader2 } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { providersApi } from "@/api/providers";
 import { useToast } from "@/hooks/use-toast";
-import CloudProviderForm from "@/components/forms/CloudProviderForm";
+import ProviderConnectionModal from "@/components/providers/ProviderConnectionModal";
 import ProviderIcon from "@/components/common/ProviderIcon";
 
 // Login form schema
@@ -361,7 +361,7 @@ const AuthPage: React.FC = () => {
                                   htmlFor={`provider-${provider.id}`}
                                   className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300"
                                 >
-                                  <ProviderIcon provider={provider.type} className="mr-2" />
+                                  <ProviderIcon providerId={provider.id} size="small" className="mr-2" />
                                   {provider.name}
                                 </label>
                               </FormItem>
@@ -421,14 +421,21 @@ const AuthPage: React.FC = () => {
         </Tabs>
       </div>
       
-      {/* Cloud Provider Modal */}
+      {/* Cloud Provider Connection Modal */}
       {selectedProvider !== null && (
-        <CloudProviderForm
-          open={isProviderModalOpen}
-          onOpenChange={setIsProviderModalOpen}
+        <ProviderConnectionModal
+          isOpen={isProviderModalOpen}
+          onClose={() => setIsProviderModalOpen(false)}
           provider={providers.find(p => p.id === selectedProvider) || providers[0]}
-          onSubmit={handleProviderSubmit}
-          isSubmitting={connectProviderMutation.isPending}
+          onConnect={(providerId, data) => {
+            connectProviderMutation.mutate({
+              providerId,
+              credentials: {
+                accessKey: data.accessKey,
+                bucketName: data.bucketName
+              }
+            });
+          }}
         />
       )}
     </div>

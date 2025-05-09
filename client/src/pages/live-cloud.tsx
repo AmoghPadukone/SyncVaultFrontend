@@ -38,10 +38,9 @@ import ProviderIcon from "@/components/common/ProviderIcon";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import CloudProviderForm from "@/components/forms/CloudProviderForm";
+import ProviderConnectionModal from "@/components/providers/ProviderConnectionModal";
 import ProviderList from "@/components/providers/ProviderList";
 import ProviderToggle, { ProviderState } from "@/components/providers/ProviderToggle";
-import ProviderConnectionModal from "@/components/providers/ProviderConnectionModal";
 
 const LiveCloud: React.FC = () => {
   const [isConnectDialogOpen, setIsConnectDialogOpen] = useState(false);
@@ -362,14 +361,21 @@ const LiveCloud: React.FC = () => {
         </AlertDialogContent>
       </AlertDialog>
       
-      {/* Cloud Provider Form Modal */}
+      {/* Cloud Provider Connection Modal */}
       {selectedProviderId !== null && (
-        <CloudProviderForm
-          open={isProviderModalOpen}
-          onOpenChange={setIsProviderModalOpen}
+        <ProviderConnectionModal
+          isOpen={isProviderModalOpen}
+          onClose={() => setIsProviderModalOpen(false)}
           provider={supportedProviders.find(p => p.id === selectedProviderId) || supportedProviders[0]}
-          onSubmit={handleProviderSubmit}
-          isSubmitting={connectProviderMutation.isPending}
+          onConnect={(providerId, data) => {
+            connectProviderMutation.mutate({
+              providerId,
+              credentials: {
+                accessKey: data.accessKey,
+                bucketName: data.bucketName
+              }
+            });
+          }}
         />
       )}
     </div>
