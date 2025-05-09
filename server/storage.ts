@@ -198,6 +198,7 @@ export class MemStorage implements IStorage {
         accessToken: "demo-access-token",
         refreshToken: "demo-refresh-token",
         expiresAt,
+        isActive: provider.id === 1, // Make only the first provider (GCP) active by default
         metadata: {
           storageUsed: 68 * 1024 * 1024 * 1024, // 68 GB
           storageTotal: 100 * 1024 * 1024 * 1024, // 100 GB
@@ -359,7 +360,9 @@ export class MemStorage implements IStorage {
         createdAt: now,
         updatedAt: now,
         externalId: null,
-        thumbnailUrl: null
+        thumbnailUrl: null,
+        isFavorite: false,
+        tags: []
       };
       this.files.set(fileId, fileObj);
     }
@@ -379,7 +382,9 @@ export class MemStorage implements IStorage {
         createdAt: now,
         updatedAt: now,
         externalId: null,
-        thumbnailUrl: null
+        thumbnailUrl: null,
+        isFavorite: false,
+        tags: []
       };
       this.files.set(fileId, fileObj);
     }
@@ -610,6 +615,7 @@ export class MemStorage implements IStorage {
       accessToken: connectionInfo.accessToken || "mock-access-token",
       refreshToken: connectionInfo.refreshToken || "mock-refresh-token",
       expiresAt,
+      isActive: connectionInfo.isActive !== undefined ? connectionInfo.isActive : true,
       metadata: connectionInfo.metadata || null
     };
     
