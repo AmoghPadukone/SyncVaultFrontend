@@ -33,7 +33,36 @@ const MyDrive: React.FC = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isCreateFolderDialogOpen, setIsCreateFolderDialogOpen] = useState(false);
   const [currentFolderId, setCurrentFolderId] = useState<number | null>(null);
+  const [, setLocation] = useLocation();
+  const [, params] = useRoute("/drive/folder/:folderId");
   const { toast } = useToast();
+  
+  // Handle route params for folder navigation
+  useEffect(() => {
+    if (params && params.folderId) {
+      const folderId = parseInt(params.folderId);
+      if (!isNaN(folderId)) {
+        setCurrentFolderId(folderId);
+      }
+    } else {
+      setCurrentFolderId(null);
+    }
+  }, [params]);
+
+  // Get current folder info
+  const { data: currentFolder } = useQuery({
+    queryKey: ["/api/folders/get", currentFolderId],
+    queryFn: () => currentFolderId ? filesApi.getFolder(currentFolderId) : null,
+    enabled: currentFolderId !== null,
+  });
+
+  const handleBackToParent = () => {
+    if (currentFolder?.parentId) {
+      setLocation(`/drive/folder/${currentFolder.parentId}`);
+    } else {
+      setLocation('/my-drive');
+    }
+  };
 
   // Fetch folder contents
   const { data: folderContents, isLoading } = useQuery({
@@ -89,7 +118,21 @@ const MyDrive: React.FC = () => {
           {/* Action Buttons */}
           <div className="mb-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-              <h2 className="text-xl font-semibold text-gray-800 dark:text-white">My Drive</h2>
+              <div className="flex items-center">
+                {currentFolderId && (
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="mr-2"
+                    onClick={handleBackToParent}
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </Button>
+                )}
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
+                  {currentFolder ? currentFolder.name : "My Drive"}
+                </h2>
+              </div>
               
               <div className="mt-3 sm:mt-0 flex items-center space-x-2">
                 <div className="flex items-center">

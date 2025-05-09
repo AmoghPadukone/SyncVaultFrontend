@@ -22,9 +22,19 @@ export const filesApi = {
     return await res.json();
   },
 
+  downloadFile: async (fileId: number): Promise<Blob> => {
+    const res = await apiRequest("GET", `/api/files/${fileId}/download`);
+    return await res.blob();
+  },
+
   // Folder operations
   createFolder: async (folderData: InsertFolder): Promise<Folder> => {
     const res = await apiRequest("POST", "/api/folders/create", folderData);
+    return await res.json();
+  },
+
+  getFolder: async (folderId: number): Promise<Folder> => {
+    const res = await apiRequest("GET", `/api/folders/${folderId}`);
     return await res.json();
   },
 
