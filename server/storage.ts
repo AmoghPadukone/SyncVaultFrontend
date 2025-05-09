@@ -839,7 +839,9 @@ export class MemStorage implements IStorage {
       mimeType: fileData.mimeType || null,
       thumbnailUrl: fileData.thumbnailUrl || null,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
+      isFavorite: false,
+      tags: []
     };
     
     this.files.set(id, file);

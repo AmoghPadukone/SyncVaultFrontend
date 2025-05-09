@@ -6,6 +6,11 @@ export interface FolderContents {
   files: File[];
 }
 
+export interface TagOperationResponse {
+  fileId: number;
+  tags: string[];
+}
+
 export const filesApi = {
   // File operations
   uploadFile: async (fileData: InsertFile): Promise<File> => {
@@ -25,6 +30,23 @@ export const filesApi = {
   downloadFile: async (fileId: number): Promise<Blob> => {
     const res = await apiRequest("GET", `/api/files/${fileId}/download`);
     return await res.blob();
+  },
+
+  // Favorite operations
+  toggleFavorite: async (fileId: number): Promise<File> => {
+    const res = await apiRequest("PATCH", `/api/files/${fileId}/favorite`);
+    return await res.json();
+  },
+
+  // Tag operations
+  addTag: async (fileId: number, tag: string): Promise<TagOperationResponse> => {
+    const res = await apiRequest("POST", `/api/files/${fileId}/tags`, { tag });
+    return await res.json();
+  },
+
+  removeTag: async (fileId: number, tag: string): Promise<TagOperationResponse> => {
+    const res = await apiRequest("DELETE", `/api/files/${fileId}/tags/${encodeURIComponent(tag)}`);
+    return await res.json();
   },
 
   // Folder operations

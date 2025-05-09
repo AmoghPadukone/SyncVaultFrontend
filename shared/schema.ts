@@ -55,6 +55,8 @@ export const files = pgTable("files", {
   thumbnailUrl: text("thumbnail_url"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+  isFavorite: boolean("is_favorite").default(false),
+  tags: text("tags").array().default([]),
 });
 
 export const sharedFiles = pgTable("shared_files", {
