@@ -174,11 +174,44 @@ const SearchResults: React.FC = () => {
           </div>
           
           {/* Search Mode Toggle */}
-          <div className="mb-6">
+          <div className="mb-6 flex items-center justify-between">
             <ModeToggle 
               activeMode={searchMode} 
-              onModeChange={(mode) => setSearchMode(mode)} 
+              onModeChange={(mode) => setSearchMode(mode)}
+              activeFiltersCount={getActiveFiltersCount()}
             />
+            
+            {searchMode === "advanced" && getActiveFiltersCount() > 0 && (
+              <Button 
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setAdvancedSearchParams({
+                    fileName: "",
+                    mimeType: "all",
+                    tag: "",
+                    isFavorite: false,
+                    sizeMin: 0,
+                    sizeMax: undefined,
+                    sharedOnly: false,
+                    createdBefore: undefined,
+                    createdAfter: undefined,
+                  });
+                  
+                  // Update URL to remove parameters
+                  window.history.replaceState(
+                    {}, 
+                    '', 
+                    '/search?mode=advanced'
+                  );
+                  
+                  // Trigger a new search with the cleared filters
+                  refetch();
+                }}
+              >
+                Reset Filters
+              </Button>
+            )}
           </div>
           
           {/* Search Results */}

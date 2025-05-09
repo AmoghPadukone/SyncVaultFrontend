@@ -9,6 +9,7 @@ import {
 import { Filter } from "lucide-react";
 import AdvancedSearchForm from "./AdvancedSearchForm";
 import { AdvancedSearchParams } from "@/lib/schemas/search-schema";
+import { Button } from "@/components/ui/button";
 
 interface AdvancedSearchModalProps {
   open: boolean;
@@ -30,6 +31,23 @@ const AdvancedSearchModal: React.FC<AdvancedSearchModalProps> = ({
   const handleSearch = (data: AdvancedSearchParams) => {
     onSearch(data);
     onOpenChange(false); // Close modal after search
+  };
+  
+  // Function to count active filters
+  const getActiveFiltersCount = (params?: AdvancedSearchParams) => {
+    if (!params) return 0;
+    
+    let count = 0;
+    if (params.fileName) count++;
+    if (params.mimeType !== "all") count++;
+    if (params.tag) count++;
+    if (params.isFavorite) count++;
+    if (params.sharedOnly) count++;
+    if (params.sizeMin > 0) count++;
+    if (params.sizeMax) count++;
+    if (params.createdAfter) count++;
+    if (params.createdBefore) count++;
+    return count;
   };
 
   return (
