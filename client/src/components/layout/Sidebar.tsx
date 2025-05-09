@@ -72,7 +72,7 @@ const Sidebar: React.FC = () => {
           <Link href="/cloud">
             <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${location === "/cloud" ? "bg-primary text-white" : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"}`}>
               <CloudIcon className="h-5 w-5 mr-3" />
-              Cloud
+              Providers
             </a>
           </Link>
           
@@ -85,7 +85,7 @@ const Sidebar: React.FC = () => {
         </div>
         
         <div className="pt-6">
-          <h2 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Connected Clouds</h2>
+          <h2 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Connected Providers</h2>
           <div className="mt-2 space-y-1">
             {userProviders.map((connection) => (
               <Link key={connection.id} href="/cloud">
