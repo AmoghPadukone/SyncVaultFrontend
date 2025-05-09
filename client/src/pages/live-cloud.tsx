@@ -33,8 +33,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { CloudIcon, LinkIcon, PlusCircle, AlertCircle, XCircle, Loader2 } from "lucide-react";
-import { SiGoogledrive, SiDropbox, SiMicrosoftonedrive, SiBox } from "react-icons/si";
+import { CloudIcon, LinkIcon, PlusCircle, AlertCircle, XCircle, Loader2, Cloud } from "lucide-react";
+import { SiGoogledrive, SiDropbox, SiBox } from "react-icons/si";
 import ProviderIcon from "@/components/common/ProviderIcon";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";

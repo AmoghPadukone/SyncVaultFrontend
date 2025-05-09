@@ -303,7 +303,7 @@ const AuthPage: React.FC = () => {
                                 >
                                   {provider.type === "google-drive" && <SiGoogledrive className="mr-2 text-yellow-500" />}
                                   {provider.type === "dropbox" && <SiDropbox className="mr-2 text-blue-500" />}
-                                  {provider.type === "onedrive" && <SiMicrosoftonedrive className="mr-2 text-blue-600" />}
+                                  {provider.type === "onedrive" && <Cloud className="mr-2 text-blue-600" />}
                                   {provider.name}
                                 </label>
                               </FormItem>
