@@ -404,7 +404,9 @@ export class MemStorage implements IStorage {
         createdAt: now,
         updatedAt: now,
         externalId: null,
-        thumbnailUrl: null
+        thumbnailUrl: null,
+        isFavorite: false,
+        tags: []
       };
       this.files.set(fileId, fileObj);
     }
@@ -424,7 +426,9 @@ export class MemStorage implements IStorage {
         createdAt: now,
         updatedAt: now,
         externalId: null,
-        thumbnailUrl: null
+        thumbnailUrl: null,
+        isFavorite: false,
+        tags: []
       };
       this.files.set(fileId, fileObj);
     }
@@ -444,7 +448,9 @@ export class MemStorage implements IStorage {
         createdAt: now,
         updatedAt: now,
         externalId: null,
-        thumbnailUrl: null
+        thumbnailUrl: null,
+        isFavorite: false,
+        tags: []
       };
       this.files.set(fileId, fileObj);
     }
@@ -463,7 +469,9 @@ export class MemStorage implements IStorage {
       createdAt: now,
       updatedAt: now,
       externalId: null,
-      thumbnailUrl: null
+      thumbnailUrl: null,
+      isFavorite: true,
+      tags: ["important", "company"]
     };
     this.files.set(sharedFileId, sharedFile);
     
