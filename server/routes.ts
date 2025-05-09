@@ -154,6 +154,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to retrieve file" });
     }
   });
+  
+  // Toggle favorite status
+  app.patch("/api/files/:id/favorite", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    const fileId = parseInt(req.params.id);
+    if (isNaN(fileId)) {
+      return res.status(400).json({ message: "Invalid file ID" });
+    }
+    
+    try {
+      const file = await storage.getFile(fileId);
+      
+      if (!file) {
+        return res.status(404).json({ message: "File not found" });
+      }
+      
+      if (file.userId !== req.user.id) {
+        return res.status(403).json({ message: "You don't have permission to modify this file" });
+      }
+      
+      const updatedFile = await storage.toggleFavorite(fileId);
+      res.json(updatedFile);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to toggle favorite status" });
+    }
+  });
+  
+  // Add tag to file
+  app.post("/api/files/:id/tags", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    const fileId = parseInt(req.params.id);
+    if (isNaN(fileId)) {
+      return res.status(400).json({ message: "Invalid file ID" });
+    }
+    
+    const { tag } = req.body;
+    if (!tag || typeof tag !== 'string') {
+      return res.status(400).json({ message: "Tag is required and must be a string" });
+    }
+    
+    try {
+      const file = await storage.getFile(fileId);
+      
+      if (!file) {
+        return res.status(404).json({ message: "File not found" });
+      }
+      
+      if (file.userId !== req.user.id) {
+        return res.status(403).json({ message: "You don't have permission to modify this file" });
+      }
+      
+      const result = await storage.addTag(fileId, tag);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to add tag" });
+    }
+  });
+  
+  // Remove tag from file
+  app.delete("/api/files/:id/tags/:tag", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    const fileId = parseInt(req.params.id);
+    if (isNaN(fileId)) {
+      return res.status(400).json({ message: "Invalid file ID" });
+    }
+    
+    const tag = decodeURIComponent(req.params.tag);
+    
+    try {
+      const file = await storage.getFile(fileId);
+      
+      if (!file) {
+        return res.status(404).json({ message: "File not found" });
+      }
+      
+      if (file.userId !== req.user.id) {
+        return res.status(403).json({ message: "You don't have permission to modify this file" });
+      }
+      
+      const result = await storage.removeTag(fileId, tag);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to remove tag" });
+    }
+  });
 
   app.post("/api/folders/create", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);

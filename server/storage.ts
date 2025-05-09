@@ -91,6 +91,9 @@ export interface IStorage {
   createFile(file: InsertFile): Promise<File>;
   getFile(id: number): Promise<File | undefined>;
   deleteFile(id: number): Promise<boolean>;
+  toggleFavorite(fileId: number): Promise<File>;
+  addTag(fileId: number, tag: string): Promise<{ fileId: number, tags: string[] }>;
+  removeTag(fileId: number, tag: string): Promise<{ fileId: number, tags: string[] }>;
   
   // Search methods
   searchItems(userId: number, query: string): Promise<File[]>;
@@ -862,6 +865,51 @@ export class MemStorage implements IStorage {
     }
     
     return this.files.delete(id);
+  }
+  
+  async toggleFavorite(fileId: number): Promise<File> {
+    const file = await this.getFile(fileId);
+    if (!file) {
+      throw new Error(`File with id ${fileId} not found`);
+    }
+    
+    file.isFavorite = !file.isFavorite;
+    this.files.set(fileId, file);
+    return file;
+  }
+  
+  async addTag(fileId: number, tag: string): Promise<{ fileId: number, tags: string[] }> {
+    const file = await this.getFile(fileId);
+    if (!file) {
+      throw new Error(`File with id ${fileId} not found`);
+    }
+    
+    if (!file.tags) {
+      file.tags = [];
+    }
+    
+    if (!file.tags.includes(tag)) {
+      file.tags.push(tag);
+    }
+    
+    this.files.set(fileId, file);
+    return { fileId, tags: file.tags };
+  }
+  
+  async removeTag(fileId: number, tag: string): Promise<{ fileId: number, tags: string[] }> {
+    const file = await this.getFile(fileId);
+    if (!file) {
+      throw new Error(`File with id ${fileId} not found`);
+    }
+    
+    if (!file.tags) {
+      file.tags = [];
+      return { fileId, tags: [] };
+    }
+    
+    file.tags = file.tags.filter(t => t !== tag);
+    this.files.set(fileId, file);
+    return { fileId, tags: file.tags };
   }
 
   // Search methods
