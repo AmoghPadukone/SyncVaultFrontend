@@ -268,19 +268,73 @@ export class MemStorage implements IStorage {
     const docFiles = [
       { name: "Project Proposal.docx", size: 2.4 * 1024 * 1024, mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" },
       { name: "Meeting Notes.txt", size: 24 * 1024, mimeType: "text/plain" },
-      { name: "Budget 2025.xlsx", size: 1.8 * 1024 * 1024, mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }
+      { name: "Budget 2025.xlsx", size: 1.8 * 1024 * 1024, mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" },
+      { name: "Client Requirements.docx", size: 3.2 * 1024 * 1024, mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" },
+      { name: "Product Roadmap.pptx", size: 5.4 * 1024 * 1024, mimeType: "application/vnd.openxmlformats-officedocument.presentationml.presentation" }
     ];
     
     const photoFiles = [
       { name: "Team Photo.jpg", size: 3.2 * 1024 * 1024, mimeType: "image/jpeg" },
       { name: "Product Launch.png", size: 4.5 * 1024 * 1024, mimeType: "image/png" },
-      { name: "Office Setup.jpg", size: 2.8 * 1024 * 1024, mimeType: "image/jpeg" }
+      { name: "Office Setup.jpg", size: 2.8 * 1024 * 1024, mimeType: "image/jpeg" },
+      { name: "Conference Keynote.jpg", size: 4.1 * 1024 * 1024, mimeType: "image/jpeg" },
+      { name: "UI Mockups.png", size: 6.7 * 1024 * 1024, mimeType: "image/png" },
+      { name: "Team Building Event.jpg", size: 5.3 * 1024 * 1024, mimeType: "image/jpeg" }
     ];
     
     const reportFiles = [
       { name: "Q1 Analysis.pdf", size: 8.7 * 1024 * 1024, mimeType: "application/pdf" },
       { name: "Market Research.pdf", size: 12.4 * 1024 * 1024, mimeType: "application/pdf" },
-      { name: "Project Timeline.pdf", size: 5.2 * 1024 * 1024, mimeType: "application/pdf" }
+      { name: "Project Timeline.pdf", size: 5.2 * 1024 * 1024, mimeType: "application/pdf" },
+      { name: "Annual Report 2024.pdf", size: 18.3 * 1024 * 1024, mimeType: "application/pdf" },
+      { name: "Risk Assessment.pdf", size: 4.6 * 1024 * 1024, mimeType: "application/pdf" }
+    ];
+    
+    // Create additional folders and files
+    const mediaFolderId = this.currentFolderId++;
+    const mediaFolder = {
+      id: mediaFolderId,
+      name: "Media",
+      path: "/Media",
+      userId,
+      parentId: null,
+      isRoot: false,
+      createdAt: now,
+      updatedAt: now,
+      providerId: null,
+      externalId: null
+    };
+    this.folders.set(mediaFolderId, mediaFolder);
+    
+    const developmentFolderId = this.currentFolderId++;
+    const developmentFolder = {
+      id: developmentFolderId,
+      name: "Development",
+      path: "/Development",
+      userId,
+      parentId: null,
+      isRoot: false,
+      createdAt: now,
+      updatedAt: now,
+      providerId: null,
+      externalId: null
+    };
+    this.folders.set(developmentFolderId, developmentFolder);
+    
+    // Add media files
+    const mediaFiles = [
+      { name: "Product Demo.mp4", size: 156.4 * 1024 * 1024, mimeType: "video/mp4" },
+      { name: "Promotional Video.mov", size: 245.8 * 1024 * 1024, mimeType: "video/quicktime" },
+      { name: "Company Jingle.mp3", size: 3.2 * 1024 * 1024, mimeType: "audio/mpeg" }
+    ];
+    
+    // Add development files
+    const devFiles = [
+      { name: "app.js", size: 145 * 1024, mimeType: "application/javascript" },
+      { name: "styles.css", size: 82 * 1024, mimeType: "text/css" },
+      { name: "index.html", size: 64 * 1024, mimeType: "text/html" },
+      { name: "database.sql", size: 1.2 * 1024 * 1024, mimeType: "application/sql" },
+      { name: "README.md", size: 12 * 1024, mimeType: "text/markdown" }
     ];
     
     // Add files directly to avoid async issues
@@ -336,6 +390,46 @@ export class MemStorage implements IStorage {
         mimeType: file.mimeType,
         providerId: providers[2].id, // Azure
         path: `/Work Projects/Reports/${file.name}`,
+        createdAt: now,
+        updatedAt: now,
+        externalId: null,
+        thumbnailUrl: null
+      };
+      this.files.set(fileId, fileObj);
+    }
+    
+    // Add media files to Media folder
+    for (const file of mediaFiles) {
+      const fileId = this.currentFileId++;
+      const fileObj = {
+        id: fileId,
+        name: file.name,
+        userId,
+        folderId: mediaFolderId,
+        size: file.size,
+        mimeType: file.mimeType,
+        providerId: providers[0].id, // GCP
+        path: `/Media/${file.name}`,
+        createdAt: now,
+        updatedAt: now,
+        externalId: null,
+        thumbnailUrl: null
+      };
+      this.files.set(fileId, fileObj);
+    }
+    
+    // Add development files to Development folder
+    for (const file of devFiles) {
+      const fileId = this.currentFileId++;
+      const fileObj = {
+        id: fileId,
+        name: file.name,
+        userId,
+        folderId: developmentFolderId,
+        size: file.size,
+        mimeType: file.mimeType,
+        providerId: providers[2].id, // Azure
+        path: `/Development/${file.name}`,
         createdAt: now,
         updatedAt: now,
         externalId: null,
@@ -584,11 +678,41 @@ export class MemStorage implements IStorage {
     
     // Get subfolders
     const subfolders = Array.from(this.folders.values())
-      .filter(folder => folder.parentId === targetFolder!.id && folder.userId === userId);
+      .filter(folder => 
+        folder.parentId === targetFolder!.id && 
+        folder.userId === userId
+      );
       
     // Get files in this folder
     const folderFiles = Array.from(this.files.values())
-      .filter(file => file.folderId === targetFolder!.id && file.userId === userId);
+      .filter(file => 
+        file.folderId === targetFolder!.id && 
+        file.userId === userId
+      );
+
+    // When root folder and user is demo account (id 1) and there's no content showing
+    // Show all folders at the root level
+    if (folderId === null && userId === 1 && (subfolders.length === 0 || folderFiles.length === 0)) {
+      // Get all root-level folders for this user (that aren't already the root folder)
+      const rootLevelFolders = Array.from(this.folders.values())
+        .filter(folder => 
+          folder.userId === userId && 
+          folder.parentId === null && 
+          !folder.isRoot
+        );
+      
+      // Get all files for this user that don't have a folder
+      const rootLevelFiles = Array.from(this.files.values())
+        .filter(file => 
+          file.userId === userId && 
+          (file.folderId === null || file.folderId === targetFolder!.id)
+        );
+      
+      return {
+        folders: rootLevelFolders,
+        files: rootLevelFiles
+      };
+    }
       
     return {
       folders: subfolders,
