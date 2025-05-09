@@ -1,0 +1,163 @@
+Project Overview:
+
+Develop a React-based MVP frontend for SyncVault, a Google Drive–like cloud storage manager. The application should be built using Vite, Tailwind CSS, and Recoil for state management. It must integrate with a NestJS backend via REST APIs, utilizing JWT for authentication. The frontend should be scalable, modular, and follow industry best practices.
+
+Technical Specifications:
+
+Framework: React 18 with Vite
+
+Routing: React Router DOM v6+
+
+Styling: Tailwind CSS
+
+State Management: Recoil
+
+Forms: React Hook Form with Zod for validation
+
+Icons: Heroicons or Lucide
+
+API Communication: Axios with JWT in Authorization headers
+
+Authentication:
+
+Signup: POST /api/auth/signup (collect cloud provider info)
+
+Login: POST /api/auth/login
+
+Get Profile: GET /api/auth/me
+
+Update Profile: PATCH /api/auth/profile
+
+Cloud Providers:
+
+List Supported: GET /api/providers
+
+Connect: POST /api/providers/connect
+
+Disconnect: DELETE /api/providers/{providerId}
+
+List Connected: GET /api/providers/user-connected
+
+Files & Folders:
+
+Upload: POST /api/files/upload
+
+Delete File: DELETE /api/files/{id}
+
+Get File Metadata: GET /api/files/{id}
+
+Create Folder: POST /api/folders/create
+
+List Folder Contents: GET /api/folders/contents
+
+Search:
+
+Raw Search: POST /api/search/raw
+
+Advanced Search: POST /api/search/advanced
+
+Smart Search: POST /api/search/smart
+
+Sharing:
+
+Generate Share Link: POST /api/share
+
+List Shared Files: GET /api/share
+
+Revoke Sharing: DELETE /api/share/{fileId}
+
+UI/UX Requirements:
+
+Layout:
+
+Sidebar with navigation (My Drive, Shared, Cloud, Settings)
+
+Topbar with search bar and user profile
+
+Main content area for displaying files/folders
+
+Search Bar:
+
+Always visible in the topbar
+
+On focus, expands to center with mode toggles: Raw, Advanced, Smart
+
+Smart mode displays a JSON preview before executing the search
+
+File Browser:
+
+Grid/list view toggle
+
+Drag-and-drop file upload
+
+Context menu for file actions
+
+Responsive Design:
+
+Mobile-friendly layout
+
+Accessible components with keyboard navigation
+
+Folder Structure:
+
+graphql
+Copy
+Edit
+src/
+├── api/                # Axios instances & API services
+│   ├── auth.ts
+│   ├── files.ts
+│   ├── search.ts
+│   └── providers.ts
+├── components/         # Reusable UI components
+│   ├── common/         # Buttons, Inputs, Icons
+│   ├── layout/         # Sidebar, Header, TopNav
+│   ├── files/          # FileCard, FolderCard, UploadZone
+│   └── search/         # SearchBar, ModeToggle, NLPPreview
+├── contexts/           # Context providers (if needed)
+├── hooks/              # Custom hooks (useAuth, useUpload, useSearch)
+├── pages/              # Page components
+│   ├── Login.tsx
+│   ├── Signup.tsx
+│   ├── Dashboard.tsx
+│   ├── MyDrive.tsx
+│   ├── LiveCloud.tsx
+│   └── SearchResults.tsx
+├── routes/             # Route definitions and guards
+├── store/              # Recoil atoms and selectors
+├── styles/             # Tailwind CSS configurations
+├── types/              # TypeScript interfaces and types
+├── utils/              # Utility functions (authHeader, storage helpers)
+├── App.tsx
+└── main.tsx
+Recoil Atoms/Selectors:
+
+authAtom: Stores user information and JWT token
+
+searchModeAtom: Tracks current search mode (raw, advanced, smart)
+
+searchPreviewAtom: Holds smart search preview data
+
+cloudProvidersAtom: Manages connected cloud providers
+
+driveItemsAtom: Caches file and folder data
+
+Best Practices:
+
+Use TypeScript for type safety
+
+Implement error boundaries for critical components
+
+Lazy load components where appropriate
+
+Ensure all components are accessible (ARIA attributes, keyboard navigation)
+
+Write unit tests for critical functions and components
+
+Deployment:
+
+Configure environment variables for API endpoints and JWT secrets
+
+Set up scripts for building and deploying the application
+
+Ensure the application is ready for deployment on platforms like Vercel or Netlify
