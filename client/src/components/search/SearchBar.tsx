@@ -409,7 +409,18 @@ const SearchBar: React.FC = () => {
                 type="submit" 
                 size="sm"
                 onClick={handleSearch}
-                disabled={!searchQuery.trim()}
+                disabled={searchMode === "advanced" 
+                  ? !(advancedParams.fileName || 
+                      advancedParams.tag || 
+                      advancedParams.mimeType !== "all" || 
+                      advancedParams.isFavorite || 
+                      advancedParams.sharedOnly ||
+                      advancedParams.sizeMin > 0 ||
+                      advancedParams.sizeMax ||
+                      advancedParams.createdAfter ||
+                      advancedParams.createdBefore)
+                  : !searchQuery.trim()
+                }
               >
                 Search
               </Button>

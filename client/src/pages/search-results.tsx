@@ -32,7 +32,7 @@ const SearchResults: React.FC = () => {
     createdAfter: undefined,
   });
   
-  // Get search query from URL
+  // Get search query and advanced parameters from URL
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const queryParam = params.get('query');
@@ -44,6 +44,30 @@ const SearchResults: React.FC = () => {
     
     if (modeParam && ["raw", "advanced", "smart"].includes(modeParam)) {
       setSearchMode(modeParam as "raw" | "advanced" | "smart");
+      
+      // If advanced mode, parse all the other parameters
+      if (modeParam === "advanced") {
+        const newAdvancedParams: AdvancedSearchParams = {
+          fileName: params.get('fileName') || "",
+          mimeType: params.get('mimeType') || "all",
+          tag: params.get('tag') || "",
+          isFavorite: params.get('isFavorite') === 'true',
+          sharedOnly: params.get('sharedOnly') === 'true',
+          sizeMin: params.get('sizeMin') ? parseInt(params.get('sizeMin') || "0") : 0,
+          sizeMax: params.get('sizeMax') ? parseInt(params.get('sizeMax') || "0") : undefined,
+          createdBefore: params.get('createdBefore') || undefined,
+          createdAfter: params.get('createdAfter') || undefined,
+        };
+        
+        // Only update if there are actual parameters
+        const hasAnyParam = Object.values(newAdvancedParams).some(
+          value => value !== undefined && value !== "" && value !== false && value !== 0 && value !== "all"
+        );
+        
+        if (hasAnyParam) {
+          setAdvancedSearchParams(newAdvancedParams);
+        }
+      }
     }
   }, []);
 
@@ -86,7 +110,11 @@ const SearchResults: React.FC = () => {
               <div>
                 <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Search Results</h2>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {isLoading ? 'Searching...' : `Found ${searchResults.length} results for "${searchQuery}"`}
+                  {isLoading ? 'Searching...' : 
+                    searchMode === "advanced" 
+                      ? `Found ${searchResults.length} results for advanced search${searchQuery ? ` with query "${searchQuery}"` : ""}`
+                      : `Found ${searchResults.length} results for "${searchQuery}"`
+                  }
                 </p>
               </div>
               
@@ -175,7 +203,9 @@ const SearchResults: React.FC = () => {
                 ))}
               </div>
             )
-          ) : searchQuery ? (
+          ) : searchQuery || (searchMode === "advanced" && Object.values(advancedSearchParams).some(val => 
+              val !== undefined && val !== "" && val !== false && val !== 0 && val !== "all"
+            )) ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-8">
                 <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-full">
@@ -183,7 +213,10 @@ const SearchResults: React.FC = () => {
                 </div>
                 <h3 className="mt-4 text-sm font-medium text-gray-900 dark:text-white">No results found</h3>
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  Try adjusting your search or filters to find what you're looking for
+                  {searchMode === "advanced" 
+                    ? "Try adjusting your advanced filters to find what you're looking for"
+                    : "Try adjusting your search or using different keywords"
+                  }
                 </p>
               </CardContent>
             </Card>
