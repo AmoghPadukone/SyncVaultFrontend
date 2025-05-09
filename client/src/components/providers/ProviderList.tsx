@@ -5,7 +5,7 @@ import ProviderToggle from "./ProviderToggle";
 import ProviderConnectionModal from "./ProviderConnectionModal";
 import { CloudProvider } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Cloud } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const ProviderList: React.FC = () => {
