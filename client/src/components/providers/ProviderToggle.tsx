@@ -34,7 +34,7 @@ const ProviderToggle: React.FC<ProviderToggleProps> = ({
         title: `Provider ${isActive ? "deactivated" : "activated"}`,
         description: `${provider.name} has been ${isActive ? "deactivated" : "activated"} successfully`,
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/providers/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/providers/user-connected"] });
     },
     onError: (error) => {
       toast({
@@ -75,7 +75,7 @@ const ProviderToggle: React.FC<ProviderToggleProps> = ({
     setShowDisconnectAnimation(false);
     
     // Refresh the provider data
-    queryClient.invalidateQueries({ queryKey: ["/api/providers/user"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/providers/user-connected"] });
   };
 
   const handleToggleActive = () => {

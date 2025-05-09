@@ -26,6 +26,7 @@ export const userCloudProviders = pgTable("user_cloud_providers", {
   accessToken: text("access_token"),
   refreshToken: text("refresh_token"),
   expiresAt: timestamp("expires_at"),
+  isActive: boolean("is_active").default(true),
   metadata: json("metadata")
 });
 
