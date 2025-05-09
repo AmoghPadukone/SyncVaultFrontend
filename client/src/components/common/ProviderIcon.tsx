@@ -1,37 +1,46 @@
 import React from "react";
-import { FolderOpen, CloudOff, Server } from "lucide-react";
-import { 
-  Cloud, 
-  CloudApp,
-  CloudAlerting,
-} from "@carbon/icons-react";
+import { CloudCog, Database, Server, HardDrive } from "lucide-react";
 
 interface ProviderIconProps {
-  provider: string;
+  providerId: number;
+  size?: "small" | "medium" | "large";
   className?: string;
-  size?: number;
 }
 
-const ProviderIcon: React.FC<ProviderIconProps> = ({ provider, className = "", size = 20 }) => {
-  const getProviderIcon = () => {
-    switch (provider.toLowerCase()) {
-      case "google-drive":
-      case "gcp":
-        return <Cloud className={`text-green-500 ${className}`} size={size} />;
-      case "dropbox":
-      case "aws":
-        return <CloudApp className={`text-amber-600 ${className}`} size={size} />;
-      case "onedrive":
-      case "azure":
-        return <CloudAlerting className={`text-blue-600 ${className}`} size={size} />;
-      case "none":
-        return <CloudOff className={`text-gray-400 ${className}`} size={size} />;
+const ProviderIcon: React.FC<ProviderIconProps> = ({ 
+  providerId, 
+  size = "medium", 
+  className = "" 
+}) => {
+  const getSizeClass = () => {
+    switch (size) {
+      case "small":
+        return "w-4 h-4";
+      case "large":
+        return "w-8 h-8";
+      case "medium":
       default:
-        return <Server className={`text-gray-500 ${className}`} size={size} />;
+        return "w-6 h-6";
     }
   };
-
-  return getProviderIcon();
+  
+  const sizeClass = getSizeClass();
+  
+  // Provider IDs:
+  // 1 = Google Cloud Platform
+  // 2 = Amazon S3
+  // 3 = Microsoft Azure
+  
+  switch (providerId) {
+    case 1:
+      return <CloudCog className={`text-blue-500 ${sizeClass} ${className}`} />;
+    case 2:
+      return <Database className={`text-orange-500 ${sizeClass} ${className}`} />;
+    case 3:
+      return <Server className={`text-blue-600 ${sizeClass} ${className}`} />;
+    default:
+      return <HardDrive className={`text-gray-500 ${sizeClass} ${className}`} />;
+  }
 };
 
 export default ProviderIcon;
