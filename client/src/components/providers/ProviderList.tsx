@@ -107,10 +107,10 @@ const ProviderList: React.FC = () => {
         <h3 className="text-lg font-medium mb-4">Available Cloud Providers</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {providers.map(provider => {
-            // Skip if already connected
+            // Check if the provider is already connected by the user
             const isConnected = userProviders?.some(up => up.providerId === provider.id);
-            if (isConnected) return null;
             
+            // Display all providers, regardless of connection status
             let bgColorClass = 'bg-gray-50 dark:bg-gray-800';
             let iconColorClass = 'text-primary';
             
@@ -125,11 +125,17 @@ const ProviderList: React.FC = () => {
               iconColorClass = 'text-purple-600 dark:text-purple-400';
             }
             
+            // If already connected, show a different state
+            const buttonClass = isConnected 
+              ? `p-4 rounded-lg border border-gray-200 dark:border-gray-700 opacity-60 ${bgColorClass} flex flex-col items-center justify-center text-center`
+              : `p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${bgColorClass} flex flex-col items-center justify-center text-center`;
+            
             return (
               <button 
                 key={provider.id}
-                onClick={() => handleConnectProvider(provider)}
-                className={`p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${bgColorClass} flex flex-col items-center justify-center text-center`}
+                onClick={() => !isConnected && handleConnectProvider(provider)}
+                className={buttonClass}
+                disabled={isConnected}
               >
                 <div className={`flex-shrink-0 h-12 w-12 rounded-full ${bgColorClass} flex items-center justify-center mb-3 border border-gray-200 dark:border-gray-700`}>
                   {provider.type === 'gcp' ? (
@@ -143,14 +149,26 @@ const ProviderList: React.FC = () => {
                   )}
                 </div>
                 <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">{provider.name}</h4>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Click to connect</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  {isConnected ? "Already connected" : "Click to connect"}
+                </p>
               </button>
             );
           })}
           
-          {providers.length > 0 && !providers.some(p => !userProviders?.some(up => up.providerId === p.id)) && (
+          {/* Check if no providers are available for connection */}
+          {providers.length > 0 && 
+           providers.every(p => userProviders?.some(up => up.providerId === p.id)) && 
+           userProviders && userProviders.length > 0 && (
             <div className="col-span-full text-center p-4 text-gray-500 dark:text-gray-400">
               All available cloud providers are connected
+            </div>
+          )}
+          
+          {/* Show message if no available providers */}
+          {providers.length === 0 && (
+            <div className="col-span-full text-center p-4 text-gray-500 dark:text-gray-400">
+              No cloud providers available
             </div>
           )}
         </div>
