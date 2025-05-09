@@ -79,6 +79,7 @@ export interface IStorage {
   getUserProviders(userId: number): Promise<(UserCloudProvider & { provider: CloudProvider })[]>;
   connectUserToProvider(userId: number, providerId: number, connectionInfo?: Record<string, any>): Promise<UserCloudProvider>;
   disconnectUserFromProvider(userId: number, providerId: number): Promise<boolean>;
+  getProviderContents(userId: number, providerId: number, path: string): Promise<FolderContents>;
   
   // Folder methods
   createFolder(folder: InsertFolder): Promise<Folder>;
@@ -624,6 +625,107 @@ export class MemStorage implements IStorage {
     }
     
     return true;
+  }
+  
+  async getProviderContents(userId: number, providerId: number, path: string): Promise<FolderContents> {
+    // Check if user has access to this provider
+    const userProviders = await this.getUserProviders(userId);
+    const hasAccess = userProviders.some(up => up.provider.id === providerId);
+    
+    if (!hasAccess) {
+      throw new Error("User does not have access to this provider");
+    }
+    
+    // Sanitize and normalize path
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    
+    // In a real application, we would make API calls to the cloud provider
+    // here to fetch the actual files and folders. For this demo, we'll
+    // simulate by returning files that have this providerId and matching path prefix.
+    
+    // Helper function to get directory parts from a full path
+    const getDirectoryFromPath = (filePath: string) => {
+      const parts = filePath.split('/');
+      // Remove the filename (last part)
+      parts.pop();
+      return parts.join('/') || '/';
+    };
+    
+    // Get folders directly under this path
+    const folders: Folder[] = [];
+    
+    // Track processed directory names to avoid duplicates
+    const processedDirs = new Set<string>();
+    
+    // Get files directly under this path
+    const matchingFiles: File[] = [];
+    
+    // Collect files and build folder structure
+    for (const file of this.files.values()) {
+      if (file.userId === userId && file.providerId === providerId) {
+        const fileDir = getDirectoryFromPath(file.path);
+        
+        // If the file is directly in the requested path
+        if (fileDir === normalizedPath) {
+          matchingFiles.push(file);
+        } 
+        // If the file is in a subdirectory of the requested path
+        else if (file.path.startsWith(`${normalizedPath}/`)) {
+          // Extract the next directory level
+          const remainingPath = file.path.substring(normalizedPath.length + 1);
+          const nextDir = remainingPath.split('/')[0];
+          
+          // Only add the directory if we haven't processed it yet
+          if (nextDir && !processedDirs.has(nextDir)) {
+            processedDirs.add(nextDir);
+            
+            // Create a virtual folder for this subdirectory
+            const virtualFolder: Folder = {
+              id: this.currentFolderId++, // Generate temporary ID
+              name: nextDir,
+              path: `${normalizedPath}/${nextDir}`,
+              isRoot: false,
+              userId,
+              parentId: null, // We don't track parent-child relationships in this demo
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              providerId,
+              externalId: null
+            };
+            
+            folders.push(virtualFolder);
+          }
+        }
+      }
+    }
+    
+    // If we're not at the root, add a special folder for parent directory
+    if (normalizedPath !== '/') {
+      const parentPath = normalizedPath.substring(0, normalizedPath.lastIndexOf('/')) || '/';
+      const parentName = parentPath === '/' ? 'Root' : parentPath.split('/').pop() || 'Parent';
+      
+      // Add a virtual parent folder (not to the actual storage)
+      const parentFolder: Folder = {
+        id: -1, // Special ID for parent
+        name: parentName,
+        path: parentPath,
+        isRoot: parentPath === '/',
+        userId,
+        parentId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        providerId,
+        externalId: null
+      };
+      
+      // Add to beginning of folders array
+      folders.unshift(parentFolder);
+    }
+    
+    return {
+      folders,
+      files: matchingFiles
+    };
   }
 
   // Folder methods

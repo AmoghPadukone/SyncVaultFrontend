@@ -38,6 +38,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/providers/:providerId/files", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    const providerId = parseInt(req.params.providerId);
+    if (isNaN(providerId)) {
+      return res.status(400).json({ message: "Invalid providerId" });
+    }
+    
+    const path = req.query.path as string || "/";
+    
+    try {
+      // First check if the user has access to this provider
+      const userProviders = await storage.getUserProviders(req.user.id);
+      const hasAccess = userProviders.some(up => up.provider.id === providerId);
+      
+      if (!hasAccess) {
+        return res.status(403).json({ message: "You don't have access to this cloud provider" });
+      }
+      
+      // Get the files and folders from the provider
+      const contents = await storage.getProviderContents(req.user.id, providerId, path);
+      res.json(contents);
+    } catch (error) {
+      console.error("Error getting provider files:", error);
+      res.status(500).json({ message: "Failed to retrieve files from cloud provider" });
+    }
+  });
+
   app.delete("/api/providers/:providerId", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     
