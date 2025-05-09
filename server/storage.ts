@@ -92,6 +92,7 @@ export interface IStorage {
   getFile(id: number): Promise<File | undefined>;
   deleteFile(id: number): Promise<boolean>;
   toggleFavorite(fileId: number): Promise<File>;
+  getUserFavoriteFiles(userId: number): Promise<File[]>;
   addTag(fileId: number, tag: string): Promise<{ fileId: number, tags: string[] }>;
   removeTag(fileId: number, tag: string): Promise<{ fileId: number, tags: string[] }>;
   
@@ -876,6 +877,11 @@ export class MemStorage implements IStorage {
     file.isFavorite = !file.isFavorite;
     this.files.set(fileId, file);
     return file;
+  }
+  
+  async getUserFavoriteFiles(userId: number): Promise<File[]> {
+    return Array.from(this.files.values())
+      .filter(file => file.userId === userId && file.isFavorite === true);
   }
   
   async addTag(fileId: number, tag: string): Promise<{ fileId: number, tags: string[] }> {
