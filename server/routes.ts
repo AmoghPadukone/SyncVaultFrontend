@@ -81,6 +81,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to disconnect provider" });
     }
   });
+  
+  app.patch("/api/providers/:providerId/toggle-active", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    const providerId = parseInt(req.params.providerId);
+    if (isNaN(providerId)) {
+      return res.status(400).json({ message: "Invalid providerId" });
+    }
+    
+    const { isActive } = req.body;
+    if (typeof isActive !== 'boolean') {
+      return res.status(400).json({ message: "isActive parameter is required and must be a boolean" });
+    }
+    
+    try {
+      const userProvider = await storage.updateProviderActiveStatus(req.user.id, providerId, isActive);
+      res.json(userProvider);
+    } catch (error) {
+      res.status(500).json({ message: `Failed to ${isActive ? 'activate' : 'deactivate'} provider` });
+    }
+  });
 
   // Files & Folders routes
   app.post("/api/files/upload", async (req, res) => {

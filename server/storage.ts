@@ -79,6 +79,7 @@ export interface IStorage {
   getUserProviders(userId: number): Promise<(UserCloudProvider & { provider: CloudProvider })[]>;
   connectUserToProvider(userId: number, providerId: number, connectionInfo?: Record<string, any>): Promise<UserCloudProvider>;
   disconnectUserFromProvider(userId: number, providerId: number): Promise<boolean>;
+  updateProviderActiveStatus(userId: number, providerId: number, isActive: boolean): Promise<UserCloudProvider>;
   getProviderContents(userId: number, providerId: number, path: string): Promise<FolderContents>;
   
   // Folder methods
@@ -629,6 +630,26 @@ export class MemStorage implements IStorage {
     }
     
     return true;
+  }
+  
+  async updateProviderActiveStatus(userId: number, providerId: number, isActive: boolean): Promise<UserCloudProvider> {
+    const userProviders = await this.getUserProviders(userId);
+    const userProvider = userProviders.find(up => up.provider.id === providerId);
+    
+    if (!userProvider) {
+      throw new Error("Provider connection not found");
+    }
+    
+    // Update the isActive status
+    const updatedProvider = {
+      ...userProvider,
+      isActive
+    };
+    
+    // Save the updated connection
+    this.userCloudProviders.set(userProvider.id, updatedProvider);
+    
+    return updatedProvider;
   }
   
   async getProviderContents(userId: number, providerId: number, path: string): Promise<FolderContents> {

@@ -30,5 +30,10 @@ export const providersApi = {
 
   disconnectProvider: async (providerId: number): Promise<void> => {
     await apiRequest("DELETE", `/api/providers/${providerId}`);
+  },
+  
+  toggleProviderActive: async (providerId: number, isActive: boolean): Promise<UserCloudProvider> => {
+    const res = await apiRequest("PATCH", `/api/providers/${providerId}/toggle-active`, { isActive });
+    return await res.json();
   }
 };
