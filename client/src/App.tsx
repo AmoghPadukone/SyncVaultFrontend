@@ -1,20 +1,20 @@
-import { Switch, Route } from "wouter";
-import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { RecoilRoot } from "recoil";
-import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
 import Dashboard from "@/pages/dashboard";
-import MyDrive from "@/pages/my-drive";
-import Shared from "@/pages/shared";
+import Favorites from "@/pages/favorites";
 import LiveCloud from "@/pages/live-cloud";
+import MyDrive from "@/pages/my-drive";
+import NotFound from "@/pages/not-found";
 import SearchResults from "@/pages/search-results";
 import Settings from "@/pages/settings";
-import Favorites from "@/pages/favorites";
+import Shared from "@/pages/shared";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { RecoilRoot } from "recoil";
+import { Route, Switch } from "wouter";
 import { AuthProvider } from "./hooks/use-auth";
 import { ProtectedRoute } from "./lib/protected-route";
+import { queryClient } from "./lib/queryClient";
 
 function Router() {
   return (

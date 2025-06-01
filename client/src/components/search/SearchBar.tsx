@@ -1,24 +1,24 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Search, XCircle, CalendarIcon, Tag } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import ModeToggle from "@/components/search/ModeToggle";
-import { Button } from "@/components/ui/button";
-import { useLocation } from "wouter";
-import { useRecoilState } from "recoil";
-import { searchModeAtom, searchQueryAtom } from "@/store/search-atom";
-import { useToast } from "@/hooks/use-toast";
-import NLPPreview from "@/components/search/NLPPreview";
-import { useMutation } from "@tanstack/react-query";
 import { searchApi } from "@/api/search";
-import { AdvancedSearchParams } from "@/lib/schemas/search-schema";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+import ModeToggle from "@/components/search/ModeToggle";
+import NLPPreview from "@/components/search/NLPPreview";
+import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
+import { AdvancedSearchParams } from "@/lib/schemas/search-schema";
 import { cn } from "@/lib/utils";
+import { searchModeAtom, searchQueryAtom } from "@/store/search-atom";
+import { useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { CalendarIcon, Search, Tag, XCircle } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { useRecoilState } from "recoil";
+import { useLocation } from "wouter";
 
 const FILE_TYPE_OPTIONS = [
   { label: "All Files", value: "all" },
@@ -70,14 +70,52 @@ const SearchBar: React.FC = () => {
     }
   });
 
+  const queryLLM = async (query: string) => {
+    try {
+      const res = await fetch("http://localhost:8008/api/search/smart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ query }),
+      });
+  
+      if (!res.ok) throw new Error("Failed to fetch");
+  
+      const data = await res.json();
+      console.log("LLM Response:", data);
+      return data;
+    } catch (error) {
+      console.error("Error querying LLM:", error);
+      return null;
+    }
+  };
+
+  // useEffect(() => {
+  //   // Parse the query if in smart mode and query changes
+  //   if (searchMode === "smart" && searchQuery.length > 2) {
+  //     setIsLoading(true);
+  //     const debounce = setTimeout(() => {
+
+  //       parseSmartQueryMutation.mutate(searchQuery);
+  //     }, 800);
+      
+  //     return () => clearTimeout(debounce);
+  //   } else {
+  //     setPreviewData(null);
+  //   }
+  // }, [searchQuery, searchMode]);
+
   useEffect(() => {
-    // Parse the query if in smart mode and query changes
     if (searchMode === "smart" && searchQuery.length > 2) {
       setIsLoading(true);
       const debounce = setTimeout(() => {
-        parseSmartQueryMutation.mutate(searchQuery);
+        queryLLM(searchQuery).then((data) => {
+          setPreviewData(data); // Or handle response as needed
+          setIsLoading(false);
+        });
       }, 800);
-      
+  
       return () => clearTimeout(debounce);
     } else {
       setPreviewData(null);
